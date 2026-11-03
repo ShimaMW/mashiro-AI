@@ -3,313 +3,1626 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>carecore 担当者会議AI議事録</title>
-    <link rel="icon" type="image/png" href="./favicon.png"/>
+    <title>ましろ居宅介護支援事業所・訪問看護｜AI議事録</title>
+    <link rel="icon" type="image/png" href="./favicon-mashiro.png"/>
+    <link rel="apple-touch-icon" href="./favicon-mashiro.png"/>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@400&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
     <script>
-        tailwind.config = { 
-            theme: { 
-                extend: { 
-                    colors: { 
-                        carePrimary: "#7a6859",
-                        carePrimaryDark: "#635447",
-                        carePrimaryLight: "#f5f0eb",
-                        careGreen: "#6b8e4e",
-                        careBg: "#f4f5f8",
-                        careCard: "#ffffff",
-                        careBorder: "#e5e7eb",
-                        careText: "#1f2937",
-                        careMuted: "#6b7280"
-                    }, 
-                    fontFamily: { sans: ['"Noto Sans JP"', 'sans-serif'] } 
-                } 
-            } 
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        mashiroPrimary: "#036EB8",
+                        mashiroDark: "#02528A",
+                        mashiroAccent: "#769AE3",
+                        mashiroLight: "#EAF3FA",
+                        mashiroSoft: "#F0F6FC",
+                        mashiroBg: "#F4F7FB",
+                        mashiroCard: "#FFFFFF",
+                        mashiroBorder: "#DCE6F2",
+                        mashiroText: "#1E293B",
+                        mashiroMuted: "#64748B"
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans JP"', 'sans-serif']
+                    }
+                }
+            }
         }
     </script>
     <style>
-        body { font-family: 'Noto Sans JP', sans-serif; background-color: #f4f5f8; color: #1f2937; }
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: #F4F7FB;
+            color: #1E293B;
+            -webkit-tap-highlight-color: transparent;
+        }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
         .sidebar-open { transform: translateX(0%); }
         .sidebar-closed { transform: translateX(-100%); }
+
         @keyframes popupIn {
-            from { opacity: 0; transform: scale(0.9) translateY(10px); }
+            from { opacity: 0; transform: scale(0.95) translateY(8px); }
             to { opacity: 1; transform: scale(1) translateY(0); }
         }
-        .animate-popup { animation: popupIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes pulseSoft {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+        .animate-popup { animation: popupIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        @keyframes pulseRing {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.6); }
+            70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(225, 29, 72, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
         }
-        .rec-active { animation: pulseSoft 1.2s infinite; }
+        .rec-pulse { animation: pulseRing 1.8s infinite; }
+
+        .mashiro-header-gradient {
+            background: linear-gradient(135deg, #036EB8 0%, #02528A 100%);
+        }
+        .drag-over {
+            border-color: #036EB8 !important;
+            background-color: #EAF3FA !important;
+        }
     </style>
 </head>
-<body class="bg-careBg h-[100dvh] overflow-hidden flex flex-col">
+<body class="bg-mashiroBg h-[100dvh] overflow-hidden flex flex-col">
 
-    <!-- ── Header ── -->
-    <header class="bg-white text-slate-800 px-4 py-2.5 flex justify-between items-center shadow-sm z-30 shrink-0 border-b border-careBorder">
-        <div class="flex items-center gap-3">
-            <button onclick="toggleSidebar()" class="flex items-center justify-center p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 transition" title="メニューを開く">
-                <span class="material-symbols-outlined text-2xl">menu</span>
+    <!-- ── Header (ましろコーポレートカラー＆白抜きロゴ) ── -->
+    <header class="mashiro-header-gradient text-white px-3 md:px-6 py-2.5 flex justify-between items-center shadow-md z-30 shrink-0">
+        <div class="flex items-center gap-2.5 md:gap-4 min-w-0">
+            <button onclick="toggleSidebar()" class="flex items-center justify-center p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition active:scale-95" title="過去ログ履歴を開く">
+                <span class="material-symbols-outlined text-xl md:text-2xl">folder_open</span>
             </button>
-            <div class="flex items-center gap-2">
-                <img src="./logo.png" alt="carecore" class="h-7 md:h-8 object-contain" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='inline-block';">
-                <span id="logoFallback" class="font-bold text-xl text-carePrimary hidden" style="font-family:sans-serif;">care<span class="text-careGreen">core</span></span>
-                <span class="text-xs md:text-sm font-bold text-slate-500 border-l border-slate-300 pl-2.5 ml-1">担当者会議AI議事録</span>
+
+            <a href="https://mashiro-homecare.com/" target="_blank" rel="noopener noreferrer" class="flex items-center gap-3 group min-w-0" title="ましろ訪問看護・居宅介護支援 公式サイト">
+                <img src="./logo-mashiro.png" alt="MASHIRO" class="h-7 md:h-9 w-auto object-contain drop-shadow-sm transition group-hover:opacity-90" onerror="this.style.display='none'; document.getElementById('logoFallback').style.display='flex';"/>
+                <div id="logoFallback" class="hidden items-center gap-1.5 font-extrabold text-lg tracking-wider text-white">
+                    <span>MASHIRO</span>
+                </div>
+            </a>
+
+            <div class="hidden sm:flex flex-col border-l border-white/25 pl-3">
+                <span class="text-[10px] text-sky-100 font-medium tracking-wider leading-tight">ましろ居宅介護支援事業所・訪問看護ステーション</span>
+                <span class="text-xs md:text-sm font-bold text-white tracking-wide leading-tight">カンファレンス・会議 AI議事録</span>
             </div>
         </div>
-        <div></div>
+
+        <!-- 右側ステータス＆アクション -->
+        <div class="flex items-center gap-2">
+            <!-- スリープ防止(Wake Lock)作動バッジ -->
+            <div id="wakeLockBadge" class="hidden items-center gap-1.5 bg-emerald-500/20 border border-emerald-300/40 text-emerald-100 px-2.5 py-1 rounded-full text-[11px] font-bold">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <span class="hidden md:inline">画面消灯防止(WakeLock)</span>ON
+            </div>
+
+            <!-- 過去ログ呼び出しボタン -->
+            <button onclick="toggleSidebar()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition border border-white/15">
+                <span class="material-symbols-outlined text-base">history</span>
+                <span class="hidden sm:inline">過去ログ</span>
+                <span id="historyCountBadge" class="bg-white text-mashiroPrimary text-[10px] font-extrabold px-1.5 py-0.2 rounded-full">0</span>
+            </button>
+
+            <!-- システム・API設定ボタン -->
+            <button onclick="openSettingsModal()" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition border border-white/15" title="APIキー・データベース接続設定">
+                <span class="material-symbols-outlined text-base">settings</span>
+                <span class="hidden md:inline">設定</span>
+                <span id="engineStatusDot" class="w-2 h-2 rounded-full bg-emerald-400" title="接続ステータス"></span>
+            </button>
+        </div>
     </header>
 
     <!-- ── Sidebar Overlay ── -->
-    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/40 z-40 hidden transition-opacity" onclick="toggleSidebar()"></div>
-    
-    <!-- ── Sidebar ── -->
-    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-80 bg-white flex flex-col transition-transform duration-300 sidebar-closed shadow-2xl shrink-0 border-r border-careBorder">
-        <div class="p-4 border-b border-careBorder bg-carePrimaryLight flex items-center justify-between shrink-0">
-            <div class="flex items-center gap-2 text-carePrimary">
-                <span class="material-symbols-outlined text-xl">folder_open</span>
-                <h2 class="font-bold text-sm">過去ログ呼び出し</h2>
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/45 backdrop-blur-[2px] z-40 hidden transition-opacity" onclick="toggleSidebar()"></div>
+
+    <!-- ── Sidebar (過去ログ呼び出し・検索・管理) ── -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-80 sm:w-96 bg-white flex flex-col transition-transform duration-300 sidebar-closed shadow-2xl shrink-0 border-r border-mashiroBorder">
+        <div class="p-4 border-b border-mashiroBorder bg-mashiroLight flex items-center justify-between shrink-0">
+            <div class="flex items-center gap-2 text-mashiroPrimary">
+                <span class="material-symbols-outlined text-xl">folder_managed</span>
+                <div>
+                    <h2 class="font-bold text-sm leading-tight">過去ログ・履歴一覧</h2>
+                    <p id="dbModeSubtitle" class="text-[10px] text-mashiroMuted font-medium">会議名・出力先付きで保存</p>
+                </div>
             </div>
-            <button onclick="toggleSidebar()" class="p-1 rounded-full text-slate-400 hover:bg-white transition" title="閉じる">
+            <button onclick="toggleSidebar()" class="p-1.5 rounded-full text-slate-500 hover:bg-white transition" title="閉じる">
                 <span class="material-symbols-outlined">close</span>
             </button>
         </div>
-        
-        <div class="p-3 bg-slate-50 border-b border-careBorder shrink-0 space-y-2">
+
+        <div class="p-3 bg-slate-50 border-b border-mashiroBorder shrink-0 space-y-2.5">
             <div class="flex justify-between items-center">
-                <p class="text-xs font-bold text-slate-500">保存済みデータ</p>
-                <button onclick="loadHistory()" class="text-carePrimary hover:bg-slate-200 p-1 rounded-full transition flex items-center" title="最新の情報に更新">
-                    <span class="material-symbols-outlined text-sm">refresh</span>
-                </button>
+                <span class="text-[11px] font-bold text-slate-500 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm text-mashiroPrimary">database</span>
+                    保存済み議事録データ
+                </span>
+                <div class="flex items-center gap-1">
+                    <button onclick="exportHistoryCsv()" class="text-xs text-slate-600 hover:text-mashiroPrimary hover:bg-white px-2 py-1 rounded-lg transition flex items-center gap-1 font-bold border border-transparent hover:border-slate-200" title="CSV形式で一覧出力">
+                        <span class="material-symbols-outlined text-sm">download</span>CSV出力
+                    </button>
+                    <button onclick="loadHistory(true)" class="text-xs text-mashiroPrimary hover:bg-white px-2 py-1 rounded-lg transition flex items-center gap-1 font-bold" title="クラウドから最新情報を再取得">
+                        <span class="material-symbols-outlined text-sm" id="refreshHistoryIcon">refresh</span>更新
+                    </button>
+                </div>
             </div>
             <div class="relative">
-                <span class="material-symbols-outlined absolute left-2.5 top-2.5 text-slate-400 text-base">search</span>
-                <input type="text" id="searchInput" onkeyup="filterHistory()" placeholder="名前や日付で検索..." class="w-full pl-8 p-2 text-xs bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-carePrimary outline-none">
+                <span class="material-symbols-outlined absolute left-3 top-2.5 text-slate-400 text-base">search</span>
+                <input type="text" id="searchInput" oninput="filterHistory()" placeholder="利用者名・会議名・日付で検索..." class="w-full pl-9 pr-3 py-2 text-xs bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-mashiroPrimary focus:border-mashiroPrimary outline-none transition"/>
             </div>
         </div>
-        
-        <div id="historyList" class="flex-1 overflow-y-auto p-3 space-y-2.5">
-            <div class="text-center text-slate-400 text-xs mt-5">読み込み中...</div>
+
+        <div id="historyList" class="flex-1 overflow-y-auto p-3 space-y-2">
+            <div class="text-center text-slate-400 text-xs mt-8">読み込み中...</div>
         </div>
     </aside>
 
     <!-- ── Main Workspace ── -->
-    <div class="flex-1 flex flex-col md:flex-row overflow-y-auto md:overflow-hidden relative w-full p-2.5 md:p-4 gap-3 md:gap-4">
-        
+    <div class="flex-1 flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden relative w-full p-2.5 md:p-4 gap-3.5 md:gap-4 max-w-[1800px] mx-auto">
+
         <!-- 左パネル：入力・生成 -->
-        <main class="w-full md:flex-1 md:overflow-y-auto bg-careCard rounded-xl shadow-sm flex flex-col shrink-0 border border-careBorder">
-            <div class="p-4 md:p-6 space-y-5 pb-8">
-                
-                <header class="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-carePrimary text-2xl">edit_square</span>
-                        <h2 class="text-base md:text-lg font-bold text-slate-800">新規作成</h2>
-                    </div>
-                    <div id="restoreNotice" class="hidden text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-md font-bold flex items-center gap-1 border border-emerald-200">
-                        <span class="material-symbols-outlined text-sm">inventory_2</span>前回の未作成データを復元しました
-                    </div>
-                </header>
+        <main class="w-full lg:w-[46%] xl:w-[44%] lg:overflow-y-auto bg-mashiroCard rounded-2xl shadow-sm flex flex-col shrink-0 border border-mashiroBorder">
+            <div class="p-4 md:p-5 space-y-4 pb-8">
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">📅 会議実施日</label>
-                        <input type="date" id="meetingDate" onchange="autoSaveDraft()" class="w-full p-2.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-carePrimary outline-none bg-slate-50">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-600 mb-1">👤 利用者氏名</label>
-                        <input type="text" id="clientName" oninput="autoSaveDraft()" placeholder="例: 鈴木 太郎 様" class="w-full p-2.5 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-carePrimary outline-none bg-slate-50">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1.5 flex items-center justify-between">
-                        <span>🎤 音声データの追加</span>
-                        <span class="text-[11px] font-bold text-careGreen bg-carePrimaryLight/60 px-2 py-0.5 rounded">ボイスメモ添付を推奨</span>
-                    </label>
-
-                    <!-- 推奨：ボイスメモファイル添付（メイン配置） -->
-                    <div class="bg-white border-2 border-carePrimary/40 hover:border-carePrimary rounded-xl p-4 text-center transition-all shadow-sm">
-                        <div class="flex items-center justify-center gap-1.5 text-carePrimary font-bold text-xs mb-1.5">
-                            <span class="material-symbols-outlined text-lg">mic</span>
-                            スマホのボイスメモ等で録音したファイルを添付（推奨）
-                        </div>
-                        <p class="text-[11px] text-slate-500 mb-3">
-                            ※iPhoneの「ボイスメモ」やAndroidの「録音アプリ」で録音したファイルをここで選択してください。持ち帰り時もデータが消えません。
-                        </p>
-
-                        <input type="file" id="audioFile" accept="audio/*, .m4a, .mp3, .wav, .aac, .flac" class="hidden" onchange="handleFileSelect(this)">
-                        <label for="audioFile" class="w-full py-3 px-4 bg-carePrimary hover:bg-carePrimaryDark text-white rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition cursor-pointer shadow">
-                            <span class="material-symbols-outlined text-lg">upload_file</span>
-                            録音ファイルを選択する (.m4a, .mp3等)
-                        </label>
+                <!-- ヘッダー ＆ コンパクトな出力先トグルスイッチ -->
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2.5 gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="material-symbols-outlined text-mashiroPrimary text-xl">edit_square</span>
+                        <h2 class="text-sm md:text-base font-bold text-slate-800 truncate">新規作成</h2>
+                        <span id="editingRecordBadge" class="hidden text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold border border-amber-300 shrink-0">編集中</span>
+                        <span id="restoreNotice" class="hidden text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md font-bold border border-emerald-200 shrink-0">復元済</span>
                     </div>
 
-                    <!-- 補助：ブラウザ直接録音（アコーディオン/注意書き付き） -->
-                    <div class="mt-3 bg-slate-50 border border-slate-200 rounded-xl p-3">
-                        <details class="group">
-                            <summary class="text-xs font-bold text-slate-600 cursor-pointer flex items-center justify-between list-none">
-                                <span class="flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-sm text-slate-400">sensors</span>
-                                    この画面で直接マイク録音する場合（短時間・即時作成用）
-                                </span>
-                                <span class="material-symbols-outlined text-sm transition-transform group-open:rotate-180">expand_more</span>
-                            </summary>
-                            <div class="mt-3 pt-2 border-t border-slate-200 text-center">
-                                <p class="text-[10px] text-amber-800 bg-amber-50 p-2 rounded mb-2 border border-amber-200 text-left leading-relaxed">
-                                    ⚠️ 画面が暗くなったりブラウザを閉じると録音が停止します。長時間の会議や持ち帰って作成する場合は、ボイスメモアプリでの録音を推奨します。
-                                </p>
-                                
-                                <button id="recBtn" onclick="toggleRecording()" class="w-full py-2.5 px-3 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition border border-amber-200">
-                                    <span class="material-symbols-outlined text-base" id="recIcon">fiber_manual_record</span>
-                                    <span id="recBtnText">直接録音を開始する</span>
-                                </button>
-
-                                <div id="recTimer" class="text-[11px] font-mono font-bold text-amber-800 mt-2 hidden flex items-center justify-center gap-1">
-                                    <span class="inline-block w-2 h-2 rounded-full bg-amber-600 rec-active"></span>
-                                    録音中: <span id="timerCount">00:00</span>
-                                </div>
-                            </div>
-                        </details>
-                    </div>
-
-                    <div id="fileNameDisplay" class="mt-3 text-xs font-bold text-slate-600 hidden text-center bg-carePrimaryLight/50 border border-carePrimary/30 p-2.5 rounded-lg flex items-center justify-between shadow-sm">
-                        <span class="truncate">✓ セット済み: <span id="fileNameSpan" class="text-carePrimary font-bold"></span></span>
-                        <button onclick="clearAudioFile()" class="text-slate-400 hover:text-rose-600 p-1" title="削除">
-                            <span class="material-symbols-outlined text-base">close</span>
+                    <!-- トグルスイッチ風 出力先切り替え（省スペース設計） -->
+                    <div class="inline-flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 shrink-0" title="出力先ソフトの切り替え">
+                        <button type="button" id="targetBtnKaipoke" onclick="selectTargetSystem('kaipoke')" class="px-2.5 py-1 rounded-md text-xs font-bold transition bg-mashiroPrimary text-white shadow-sm">
+                            カイポケ用
+                        </button>
+                        <button type="button" id="targetBtnIbow" onclick="selectTargetSystem('ibow')" class="px-2.5 py-1 rounded-md text-xs font-bold transition text-slate-600 hover:text-slate-900">
+                            iBow用
                         </button>
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 mb-1">📝 補足メモ・キーワード</label>
-                    <textarea id="inputText" oninput="autoSaveDraft()" class="w-full h-24 p-3 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-carePrimary resize-none shadow-inner" placeholder="（※音声があれば空欄でOK！会議で特に強調したいポイントがあれば記入してください）"></textarea>
-                </div>
+                <!-- 1. 最上部：会議実施日・利用者氏名・会議名・開催理由/区分 -->
+                <div class="space-y-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">📅 会議実施日</label>
+                            <input type="date" id="meetingDate" onchange="autoSaveDraft()" class="w-full p-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-mashiroPrimary outline-none bg-slate-50/70 font-medium"/>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">👤 利用者氏名</label>
+                            <input type="text" id="clientName" oninput="autoSaveDraft()" placeholder="例: 川口 太郎 様" class="w-full p-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-mashiroPrimary outline-none bg-slate-50/70 font-medium"/>
+                        </div>
+                    </div>
 
-                <div class="pt-2">
-                    <button id="generateBtn" onclick="generateMinutesFromUI()" class="w-full py-3.5 bg-carePrimary hover:bg-carePrimaryDark text-white rounded-xl font-bold text-sm md:text-base shadow hover:shadow-md active:scale-[0.99] transition-all flex items-center justify-center gap-2">
-                        <span class="material-symbols-outlined text-xl text-amber-300">bolt</span>
-                        AIで要約を作成する
-                    </button>
-                </div>
-                
-                <div id="loadingMsg" class="hidden text-center py-6 px-4 bg-white border border-slate-200 rounded-xl shadow-inner relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-1 bg-slate-200"><div class="h-full bg-carePrimary animate-pulse"></div></div>
-                    <div class="flex flex-col items-center justify-center gap-2">
-                        <span class="material-symbols-outlined text-3xl animate-spin text-carePrimary">sync</span>
-                        <span class="font-bold text-sm text-slate-700">AIが音声・テキストを解析中...</span>
-                        <p class="text-xs text-slate-500">画面を閉じずにそのままお待ちください（2-3分かかります）</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">📋 会議名</label>
+                            <select id="meetingNameSelect" onchange="onMeetingNameChange(this.value)" class="w-full p-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-mashiroPrimary outline-none bg-slate-50/70 font-bold text-slate-700 cursor-pointer">
+                                <option value="サービス担当者会議">サービス担当者会議</option>
+                                <option value="退院支援指導カンファレンス">退院支援指導カンファレンス</option>
+                                <option value="退院共同指導カンファレンス">退院共同指導カンファレンス</option>
+                                <option value="その他会議">その他会議</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 mb-1">🎯 実施の理由・開催区分</label>
+                            <select id="meetingReasonSelect" onchange="onMeetingReasonChange(this.value)" class="w-full p-2 text-sm border border-slate-300 rounded-xl focus:ring-2 focus:ring-mashiroPrimary outline-none bg-slate-50/70 font-bold text-slate-700 cursor-pointer">
+                                <option value="更新・プラン継続">更新・認定継続（プラン見直し）</option>
+                                <option value="新規・初回作成">新規・初回作成（新規利用開始）</option>
+                                <option value="区分変更・状態変化">区分変更・状態変化（要介護度変化・体調変化）</option>
+                                <option value="退院・退所時カンファレンス">退院・退所時（在宅復帰支援）</option>
+                                <option value="サービス追加・事業所変更">サービス追加・事業所変更</option>
+                                <option value="定期・その他">定期・その他</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
+
+                <!-- 2. 音声入力セクション（タブ切替：ブラウザ長時間録音 vs ボイスメモ添付） -->
+                <div class="space-y-2 pt-1 border-t border-slate-100">
+                    <div class="flex items-center justify-between">
+                        <label class="text-xs font-bold text-slate-600 flex items-center gap-1">
+                            🎤 音声データの追加
+                        </label>
+                        <span class="text-[10px] font-bold text-mashiroPrimary bg-mashiroLight px-2 py-0.5 rounded">長時間録音・ボイスメモ両対応</span>
+                    </div>
+
+                    <!-- モード切替タブ -->
+                    <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-100 rounded-xl border border-slate-200">
+                        <button type="button" id="tabBtnRecord" onclick="switchAudioTab('record')" class="py-1.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition bg-white text-mashiroPrimary shadow-sm">
+                            <span class="material-symbols-outlined text-base">mic</span>
+                            その場で直接録音
+                        </button>
+                        <button type="button" id="tabBtnUpload" onclick="switchAudioTab('upload')" class="py-1.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition text-slate-600 hover:text-slate-900">
+                            <span class="material-symbols-outlined text-base">upload_file</span>
+                            ボイスメモ等を添付
+                        </button>
+                    </div>
+
+                    <!-- タブ1：ブラウザ直接録音（Screen Wake Lock API ＋ 音声波形 ＋ 自動保護） -->
+                    <div id="audioPanelRecord" class="bg-gradient-to-b from-mashiroSoft to-white border border-mashiroBorder rounded-2xl p-3.5 space-y-2.5 transition-all">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-slate-300" id="recStatusDot"></span>
+                                <span class="text-xs font-bold text-slate-700" id="recStatusText">待機中（録音中は画面消灯を自動防止）</span>
+                            </div>
+                            <span class="text-base font-mono font-extrabold text-mashiroPrimary tracking-wider shrink-0" id="timerCount">00:00:00</span>
+                        </div>
+
+                        <!-- リアルタイム波形ビジュアライザー -->
+                        <div class="bg-slate-900 rounded-xl p-2 flex flex-col items-center justify-center relative overflow-hidden h-16 border border-slate-800">
+                            <canvas id="waveformCanvas" width="480" height="44" class="w-full h-10"></canvas>
+                            <div id="waveformOverlayText" class="absolute inset-0 flex items-center justify-center text-[11px] text-slate-400 font-medium pointer-events-none">
+                                録音ボタンを押すとマイク音量波形が表示されます
+                            </div>
+                        </div>
+
+                        <!-- 録音コントロールボタン群 -->
+                        <div class="flex items-center gap-2">
+                            <button type="button" id="recStartStopBtn" onclick="toggleRecording()" class="flex-1 py-2.5 px-4 bg-mashiroPrimary hover:bg-mashiroDark text-white rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition shadow-sm active:scale-[0.99]">
+                                <span class="material-symbols-outlined text-lg" id="recIcon">fiber_manual_record</span>
+                                <span id="recBtnText">直接録音を開始する</span>
+                            </button>
+
+                            <button type="button" id="recPauseResumeBtn" onclick="togglePauseRecording()" class="hidden py-2.5 px-3 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl font-bold text-xs items-center justify-center gap-1 transition border border-amber-300">
+                                <span class="material-symbols-outlined text-lg" id="pauseIcon">pause</span>
+                                <span id="pauseBtnText">一時停止</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- タブ2：ボイスメモ・音声ファイル添付 -->
+                    <div id="audioPanelUpload" class="hidden bg-white border-2 border-dashed border-mashiroAccent hover:border-mashiroPrimary rounded-2xl p-4 text-center transition-all"
+                         ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+                        <p class="text-xs font-bold text-slate-700 mb-1">
+                            スマホの「ボイスメモ」や録音アプリの音声ファイルを選択
+                        </p>
+                        <p class="text-[11px] text-slate-500 mb-3">
+                            （対応形式: .m4a, .mp3, .wav, .aac, .webm, .mp4 等 / ドラッグ＆ドロップ対応）
+                        </p>
+
+                        <input type="file" id="audioFile" accept="audio/*,video/mp4,.m4a,.mp3,.wav,.aac,.flac,.webm,.ogg" class="hidden" onchange="handleFileSelect(this)"/>
+                        <label for="audioFile" class="inline-flex w-full sm:w-auto py-2.5 px-6 bg-mashiroPrimary hover:bg-mashiroDark text-white rounded-xl font-bold text-xs md:text-sm items-center justify-center gap-2 transition cursor-pointer shadow-sm">
+                            <span class="material-symbols-outlined text-lg">folder_open</span>
+                            音声ファイルを選択する
+                        </label>
+                    </div>
+
+                    <!-- セット済み音声プレビュー＆バックアップバー -->
+                    <div id="fileNameDisplay" class="hidden bg-mashiroLight/80 border border-mashiroPrimary/30 p-2.5 rounded-xl space-y-2 shadow-sm">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="material-symbols-outlined text-mashiroPrimary text-base shrink-0">check_circle</span>
+                                <div class="min-w-0">
+                                    <p id="fileNameSpan" class="text-xs font-bold text-mashiroDark truncate"></p>
+                                    <p id="fileSizeSpan" class="text-[10px] text-slate-500 font-medium"></p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1 shrink-0">
+                                <button type="button" id="downloadRecordedAudioBtn" onclick="downloadCurrentAudio()" class="text-[11px] bg-white hover:bg-slate-50 text-mashiroPrimary border border-mashiroPrimary/30 px-2 py-1 rounded-lg font-bold flex items-center gap-1 transition shadow-sm" title="音声ファイルを端末に保存">
+                                    <span class="material-symbols-outlined text-xs">download</span>保存
+                                </button>
+                                <button type="button" onclick="clearAudioFile()" class="text-slate-400 hover:text-rose-600 p-1 rounded-lg hover:bg-white transition" title="削除">
+                                    <span class="material-symbols-outlined text-base">close</span>
+                                </button>
+                            </div>
+                        </div>
+                        <audio id="audioPreviewPlayer" controls class="w-full h-8 rounded-lg"></audio>
+                    </div>
+                </div>
+
+                <!-- 3. 補足メモ・キーワード（各4つのクイック挿入チップ付き） -->
+                <div>
+                    <div class="flex items-center justify-between mb-1.5 flex-wrap gap-1">
+                        <label class="text-xs font-bold text-slate-600">📝 補足メモ・キーワード</label>
+                        <!-- カイポケ用クイックフレーズ（4つ） -->
+                        <div id="memoChipsKaipoke" class="flex flex-wrap gap-1">
+                            <button type="button" onclick="insertMemoPhrase('本人・家族ともに現行プランでのサービス継続を希望。')" class="text-[10px] bg-slate-100 hover:bg-mashiroLight text-slate-600 hover:text-mashiroPrimary px-2 py-0.5 rounded font-medium transition">+継続希望</button>
+                            <button type="button" onclick="insertMemoPhrase('転倒リスク軽減のため手すり・福祉用具の活用を検討。')" class="text-[10px] bg-slate-100 hover:bg-mashiroLight text-slate-600 hover:text-mashiroPrimary px-2 py-0.5 rounded font-medium transition">+転倒予防</button>
+                            <button type="button" onclick="insertMemoPhrase('心身状態・ADLともに概ね安定しており、現行の支援体制を維持する。')" class="text-[10px] bg-slate-100 hover:bg-mashiroLight text-slate-600 hover:text-mashiroPrimary px-2 py-0.5 rounded font-medium transition">+状態安定</button>
+                            <button type="button" onclick="insertMemoPhrase('介護者の負担軽減およびレスパイト目的でのサービス調整を検討。')" class="text-[10px] bg-slate-100 hover:bg-mashiroLight text-slate-600 hover:text-mashiroPrimary px-2 py-0.5 rounded font-medium transition">+家族負担軽減</button>
+                        </div>
+                        <!-- iBow用クイックフレーズ（4つ） -->
+                        <div id="memoChipsIbow" class="hidden flex-wrap gap-1">
+                            <button type="button" onclick="insertMemoPhrase('ましろにて週○回訪問し、バイタル・全身状態観察・服薬管理を実施する。')" class="text-[10px] bg-slate-100 hover:bg-mashiroLight text-slate-600 hover:text-mashiroPrimary px-2 py-0.5 rounded font-medium transition">+ましろ訪看ケア</button>
+                            <button type="button" onclick="insertMemoPhrase('緊急時・状態変化時はましろへ連絡し、主治医・ケアマネジャーへ速やかに連携する。')" class="text-[10px] bg-slate-100 hover:bg-mashiroLight text-slate-600 hover:text-mashiroPrimary px-2 py-0.5 rounded font-medium transition">+緊急時連携</button>
+                            <button type="button" onclick="insertMemoPhrase('ましろのリハビリにて関節可動域訓練・歩行訓練・自宅環境での動作指導を実施する。')" class="text-[10px] bg-slate-100 hover:bg-mashiroLight text-slate-600 hover:text-mashiroPrimary px-2 py-0.5 rounded font-medium transition">+リハ・ADL維持</button>
+                            <button type="button" onclick="insertMemoPhrase('退院直後の生活リズム定着および医療処置・内服状況の確認をましろにて重点的に支援する。')" class="text-[10px] bg-slate-100 hover:bg-mashiroLight text-slate-600 hover:text-mashiroPrimary px-2 py-0.5 rounded font-medium transition">+退院後フォロー</button>
+                        </div>
+                    </div>
+                    <textarea id="inputText" oninput="autoSaveDraft()" class="w-full h-20 p-2.5 text-sm bg-slate-50/70 border border-slate-300 rounded-xl focus:ring-2 focus:ring-mashiroPrimary resize-y outline-none transition" placeholder="※音声があれば空欄でOK！会議で特に強調したいポイントがあれば記入してください"></textarea>
+                </div>
+
+                <!-- 4. AI生成実行ボタン -->
+                <div class="pt-1">
+                    <button type="button" id="generateBtn" onclick="generateMinutesFromUI()" class="w-full py-3.5 px-5 bg-mashiroPrimary hover:bg-mashiroDark text-white rounded-xl font-bold text-sm md:text-base shadow hover:shadow-md active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-xl text-amber-300">bolt</span>
+                        <span id="generateBtnLabel">AIで議事録を作成する</span>
+                    </button>
+                </div>
+
+                <!-- AI生成中の進捗表示ボックス -->
+                <div id="loadingMsg" class="hidden py-5 px-4 bg-mashiroSoft border border-mashiroPrimary/30 rounded-2xl shadow-inner relative overflow-hidden space-y-3">
+                    <div class="flex items-center justify-between text-xs font-bold text-mashiroDark">
+                        <span class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-xl animate-spin text-mashiroPrimary">progress_activity</span>
+                            <span id="loadingStepTitle">AIが音声・テキストを解析中...</span>
+                        </span>
+                        <span id="loadingElapsed" class="font-mono text-mashiroPrimary">0秒</span>
+                    </div>
+                    <div class="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                        <div id="loadingProgressBar" class="bg-mashiroPrimary h-full transition-all duration-500 rounded-full" style="width: 25%"></div>
+                    </div>
+                    <p class="text-[11px] text-slate-500">画面を閉じずにそのままお待ちください</p>
+                </div>
+
             </div>
         </main>
 
-        <!-- 右パネル：カイポケ貼付データ・プレビュー -->
-        <section id="previewSection" class="w-full md:w-[450px] lg:w-[600px] xl:w-[850px] bg-careCard rounded-xl shadow-sm flex flex-col shrink-0 border border-careBorder md:overflow-hidden relative transition-all">
-            <div class="p-3.5 border-b border-careBorder flex items-center justify-between shrink-0 sticky top-0 bg-white z-20 rounded-t-xl">
+        <!-- 右パネル：貼付データ・プレビュー＆データベース保存 -->
+        <section id="previewSection" class="w-full lg:flex-1 bg-mashiroCard rounded-2xl shadow-sm flex flex-col shrink-0 border border-mashiroBorder lg:overflow-hidden relative transition-all">
+
+            <!-- パネルヘッダー -->
+            <div class="p-3.5 md:px-5 border-b border-mashiroBorder flex flex-wrap items-center justify-between gap-2 shrink-0 sticky top-0 bg-white z-20 rounded-t-2xl">
                 <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-carePrimary">assignment_turned_in</span>
-                    <h3 class="font-bold text-slate-800 text-sm md:text-base">カイポケ貼付データ</h3>
+                    <span class="material-symbols-outlined text-mashiroPrimary">assignment_turned_in</span>
+                    <h3 id="previewHeaderTitle" class="font-bold text-slate-800 text-sm md:text-base">カイポケ貼付データ</h3>
                 </div>
-                <button onclick="clearAll()" class="text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 py-1.5 px-3 rounded-full transition flex items-center gap-1 font-bold">
-                    <span class="material-symbols-outlined text-sm">delete</span>クリア
-                </button>
+
+                <div class="flex items-center gap-1.5">
+                    <button type="button" id="copyAllBtn" onclick="copyAllFormatted(this)" class="text-xs bg-mashiroLight hover:bg-mashiroPrimary text-mashiroPrimary hover:text-white py-1.5 px-3 rounded-full transition flex items-center gap-1 font-bold border border-mashiroPrimary/20 shadow-sm">
+                        <span class="material-symbols-outlined text-sm">content_copy</span>
+                        <span id="copyAllBtnText">一括コピー</span>
+                    </button>
+                    <button type="button" onclick="clearAll()" class="text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 py-1.5 px-3 rounded-full transition flex items-center gap-1 font-bold">
+                        <span class="material-symbols-outlined text-sm">delete</span>クリア
+                    </button>
+                </div>
             </div>
-            
-            <div class="flex-1 p-4 bg-white overflow-y-auto space-y-4 pb-8">
-                
+
+            <!-- ── A. カイポケ用（複数ウインドウ：全体要約 ＋ ①〜④） ── -->
+            <div id="kaipokePreviewContainer" class="flex-1 p-4 md:p-5 bg-white overflow-y-auto space-y-4 pb-8">
                 <!-- 全体要約 -->
-                <div class="p-3 bg-carePrimaryLight/40 border border-carePrimary/20 rounded-lg">
+                <div class="p-3.5 bg-mashiroSoft border border-mashiroPrimary/25 rounded-xl">
                     <div class="flex justify-between items-center mb-2">
-                        <label class="block text-xs font-bold text-carePrimaryDark flex items-center gap-1">
-                            <span class="material-symbols-outlined text-base text-amber-600">lightbulb</span>全体要約
+                        <label class="text-xs font-bold text-mashiroDark flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-base text-mashiroPrimary">lightbulb</span>
+                            全体要約
+                            <span id="countSummary" class="text-[10px] text-slate-400 font-normal ml-1">0文字</span>
                         </label>
-                        <button onclick="copyToClipboard('outSummary', this)" class="text-xs bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 py-1 px-3 rounded-full shadow-sm flex items-center gap-1 transition-all font-bold">
+                        <button type="button" onclick="copyToClipboard('outSummary', this)" class="text-xs bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 py-1 px-3 rounded-full shadow-sm flex items-center gap-1 transition font-bold">
                             コピー
                         </button>
                     </div>
-                    <textarea id="outSummary" class="w-full text-sm bg-transparent border-none resize-y focus:ring-0 text-slate-800 p-0" rows="3" placeholder="AIの回答がここに入ります"></textarea>
+                    <textarea id="outSummary" oninput="updateCharCounts(); autoSaveDraft();" class="w-full text-sm bg-white/90 border border-mashiroBorder rounded-lg p-2.5 resize-y focus:ring-2 focus:ring-mashiroPrimary outline-none text-slate-800 leading-relaxed" rows="3" placeholder="AIの回答がここに入ります"></textarea>
                 </div>
 
                 <div class="space-y-4">
                     <div class="border-b border-slate-100 pb-3">
                         <div class="flex justify-between items-center mb-2">
-                            <label class="block text-xs font-bold text-slate-700">① 検討した項目</label>
-                            <button onclick="copyToClipboard('outItem1', this)" class="text-xs bg-white border border-slate-300 hover:bg-slate-100 py-1 px-3 rounded-full shadow-sm flex items-center gap-1 transition-all font-bold">コピー</button>
+                            <label class="text-xs font-bold text-slate-700">① 検討した項目 <span id="countItem1" class="text-[10px] text-slate-400 font-normal ml-1">0文字</span></label>
+                            <button type="button" onclick="copyToClipboard('outItem1', this)" class="text-xs bg-white border border-slate-300 hover:bg-slate-100 py-1 px-3 rounded-full shadow-sm flex items-center gap-1 transition font-bold">コピー</button>
                         </div>
-                        <textarea id="outItem1" class="w-full p-2.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-carePrimary resize-y" rows="3"></textarea>
-                    </div>
-                    
-                    <div class="border-b border-slate-100 pb-3">
-                        <div class="flex justify-between items-center mb-2">
-                            <label class="block text-xs font-bold text-slate-700">② 検討内容</label>
-                            <button onclick="copyToClipboard('outItem2', this)" class="text-xs bg-white border border-slate-300 hover:bg-slate-100 py-1 px-3 rounded-full shadow-sm flex items-center gap-1 transition-all font-bold">コピー</button>
-                        </div>
-                        <textarea id="outItem2" class="w-full p-2.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-carePrimary resize-y" rows="5"></textarea>
+                        <textarea id="outItem1" oninput="updateCharCounts(); autoSaveDraft();" class="w-full p-2.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-mashiroPrimary outline-none resize-y leading-relaxed" rows="3"></textarea>
                     </div>
 
                     <div class="border-b border-slate-100 pb-3">
                         <div class="flex justify-between items-center mb-2">
-                            <label class="block text-xs font-bold text-slate-700">③ 結論</label>
-                            <button onclick="copyToClipboard('outItem3', this)" class="text-xs bg-white border border-slate-300 hover:bg-slate-100 py-1 px-3 rounded-full shadow-sm flex items-center gap-1 transition-all font-bold">コピー</button>
+                            <label class="text-xs font-bold text-slate-700">② 検討内容 <span id="countItem2" class="text-[10px] text-slate-400 font-normal ml-1">0文字</span></label>
+                            <button type="button" onclick="copyToClipboard('outItem2', this)" class="text-xs bg-white border border-slate-300 hover:bg-slate-100 py-1 px-3 rounded-full shadow-sm flex items-center gap-1 transition font-bold">コピー</button>
                         </div>
-                        <textarea id="outItem3" class="w-full p-2.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-carePrimary resize-y" rows="4"></textarea>
+                        <textarea id="outItem2" oninput="updateCharCounts(); autoSaveDraft();" class="w-full p-2.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-mashiroPrimary outline-none resize-y leading-relaxed" rows="5"></textarea>
+                    </div>
+
+                    <div class="border-b border-slate-100 pb-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-bold text-slate-700">③ 結論 <span id="countItem3" class="text-[10px] text-slate-400 font-normal ml-1">0文字</span></label>
+                            <button type="button" onclick="copyToClipboard('outItem3', this)" class="text-xs bg-white border border-slate-300 hover:bg-slate-100 py-1 px-3 rounded-full shadow-sm flex items-center gap-1 transition font-bold">コピー</button>
+                        </div>
+                        <textarea id="outItem3" oninput="updateCharCounts(); autoSaveDraft();" class="w-full p-2.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-mashiroPrimary outline-none resize-y leading-relaxed" rows="4"></textarea>
                     </div>
 
                     <div class="pb-2">
                         <div class="flex justify-between items-center mb-2">
-                            <label class="block text-xs font-bold text-slate-700">④ 残された課題</label>
-                            <button onclick="copyToClipboard('outItem4', this)" class="text-xs bg-white border border-slate-300 hover:bg-slate-100 py-1 px-3 rounded-full shadow-sm flex items-center gap-1 transition-all font-bold">コピー</button>
+                            <label class="text-xs font-bold text-slate-700">④ 残された課題 <span id="countItem4" class="text-[10px] text-slate-400 font-normal ml-1">0文字</span></label>
+                            <button type="button" onclick="copyToClipboard('outItem4', this)" class="text-xs bg-white border border-slate-300 hover:bg-slate-100 py-1 px-3 rounded-full shadow-sm flex items-center gap-1 transition font-bold">コピー</button>
                         </div>
-                        <textarea id="outItem4" class="w-full p-2.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-carePrimary resize-y" rows="4"></textarea>
+                        <textarea id="outItem4" oninput="updateCharCounts(); autoSaveDraft();" class="w-full p-2.5 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-mashiroPrimary outline-none resize-y leading-relaxed" rows="4"></textarea>
                     </div>
                 </div>
             </div>
 
-            <div class="p-3.5 bg-slate-50 border-t border-careBorder shrink-0 sticky bottom-0 z-20 rounded-b-xl">
-                <button onclick="saveLogFromUI()" class="w-full py-3 bg-carePrimary hover:bg-carePrimaryDark text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:opacity-95 active:scale-[0.99] transition-all shadow">
+            <!-- ── B. iBow用（単一ウインドウのみ・窓分けなし） ── -->
+            <div id="ibowPreviewContainer" class="hidden flex-1 p-4 md:p-5 bg-white overflow-y-auto flex-col pb-8">
+                <div class="flex justify-between items-center mb-2 shrink-0">
+                    <label class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                        iBow 記録内容（ましろの提供ケア・役割・ToDo中心）
+                        <span id="countIbowSingle" class="text-[10px] text-slate-400 font-normal ml-1">0文字</span>
+                    </label>
+                    <button type="button" onclick="copyToClipboard('outIbowSingle', this)" class="text-xs bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 py-1 px-3 rounded-full shadow-sm flex items-center gap-1 transition font-bold">
+                        コピー
+                    </button>
+                </div>
+                <textarea id="outIbowSingle" oninput="updateCharCounts(); autoSaveDraft();" class="w-full flex-1 min-h-[420px] p-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-mashiroPrimary outline-none resize-y leading-relaxed" placeholder="AIの回答がここに入ります（iBowの1つの入力ウインドウにそのまま貼り付けられます）"></textarea>
+            </div>
+
+            <!-- 下部固定：データベース保存バー -->
+            <div class="p-3.5 md:px-5 bg-slate-50 border-t border-mashiroBorder shrink-0 sticky bottom-0 z-20 rounded-b-2xl flex items-center gap-2">
+                <button type="button" id="saveDbBtn" onclick="saveLogFromUI(false)" class="flex-1 py-3 bg-mashiroPrimary hover:bg-mashiroDark text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.99] transition-all shadow-sm">
                     <span class="material-symbols-outlined">cloud_upload</span>
-                    データベースに保存
+                    <span id="saveDbBtnText">データベースに保存</span>
+                </button>
+                <button type="button" id="saveAsNewBtn" onclick="saveLogFromUI(true)" class="hidden py-3 px-4 bg-white hover:bg-slate-100 text-mashiroPrimary border border-mashiroPrimary rounded-xl font-bold text-xs items-center justify-center gap-1 transition shadow-sm" title="別レコードとして新規追加保存">
+                    <span class="material-symbols-outlined text-base">add_circle</span>新規として保存
                 </button>
             </div>
         </section>
     </div>
 
-    <!-- ── 画面中央：保存完了モーダル ── -->
+    <!-- ── 保存完了モーダル ── -->
     <div id="saveSuccessModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-careBorder text-center animate-popup">
-            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span class="material-symbols-outlined text-4xl">check_circle</span>
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-mashiroBorder text-center animate-popup">
+            <div class="w-14 h-14 bg-mashiroLight text-mashiroPrimary rounded-full flex items-center justify-center mx-auto mb-3">
+                <span class="material-symbols-outlined text-3xl">verified</span>
             </div>
-            <h3 class="font-bold text-lg text-slate-800 mb-1" id="saveModalTitle">保存が完了しました！</h3>
-            <p class="text-xs text-slate-500 mb-6" id="saveModalMsg">データベースに保存されました。左上のメニューからいつでも呼び出せます。</p>
-            <button onclick="closeSaveSuccessModal()" class="w-full py-3 bg-carePrimary hover:bg-carePrimaryDark text-white rounded-xl font-bold text-sm shadow transition">
-                OK
+            <h3 class="font-bold text-base text-slate-800 mb-1" id="saveModalTitle">保存が完了しました！</h3>
+            <p class="text-xs text-slate-500 mb-5 leading-relaxed" id="saveModalMsg">データベースに記録されました。左上の「過去ログ」からいつでも呼び出せます。</p>
+            <button type="button" onclick="closeSaveSuccessModal()" class="w-full py-2.5 bg-mashiroPrimary hover:bg-mashiroDark text-white rounded-xl font-bold text-sm shadow transition">
+                閉じる
             </button>
         </div>
     </div>
 
+    <!-- ── ⚙️ システム・APIキー・データベース接続設定モーダル ── -->
+    <div id="settingsModal" class="fixed inset-0 bg-slate-900/55 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 md:p-4 overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl border border-mashiroBorder overflow-hidden animate-popup my-auto">
+            <!-- Header -->
+            <div class="mashiro-header-gradient text-white px-5 py-4 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-xl">tune</span>
+                    <div>
+                        <h3 class="font-bold text-sm md:text-base">システム接続・APIキー設定</h3>
+                        <p class="text-[11px] text-sky-100">ましろ居宅介護支援事業所・訪問看護 環境設定</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeSettingsModal()" class="p-1 rounded-full hover:bg-white/20 text-white transition">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="p-5 space-y-5 max-h-[80vh] overflow-y-auto text-xs">
+                <!-- 1. AI解析エンジン設定 -->
+                <div class="bg-mashiroSoft p-4 rounded-xl border border-mashiroBorder space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-mashiroDark text-sm flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-base text-mashiroPrimary">bolt</span>
+                            1. Gemini AI 高速解析エンジン設定
+                        </h4>
+                        <span class="text-[10px] bg-mashiroPrimary text-white px-2 py-0.5 rounded-full font-bold">直接通信でGAS制限を回避</span>
+                    </div>
+                    <p class="text-[11px] text-slate-600 leading-relaxed">
+                        ここにGemini APIキーを設定すると、重い音声ファイルをGAS経由にせず<strong>ブラウザから直接Gemini APIへ高速ストリーミング転送</strong>します（30〜60分の音声も数十秒で解析完了します）。
+                    </p>
+
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="block font-bold text-slate-700">Gemini API キー (`AIzaSy...`)</label>
+                            <button type="button" onclick="toggleGeminiGuide()" class="text-[11px] text-mashiroPrimary hover:text-mashiroDark font-bold flex items-center gap-1 bg-white hover:bg-mashiroLight px-2 py-0.5 rounded-md transition border border-mashiroPrimary/20">
+                                <span class="material-symbols-outlined text-sm">help</span>
+                                <span id="geminiGuideToggleText">APIキーの取得手順を見る</span>
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="password" id="cfgGeminiKey" placeholder="AIzaSy...（未入力時はVercel環境変数またはGAS側キーを使用）" class="flex-1 p-2.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-mashiroPrimary outline-none font-mono text-xs"/>
+                            <button type="button" onclick="togglePasswordVisibility('cfgGeminiKey')" class="px-3 bg-white border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 font-bold">表示</button>
+                        </div>
+
+                        <!-- 💡 Google AI Studio からの取得手順ガイド -->
+                        <div id="geminiSetupGuide" class="hidden bg-white border border-mashiroPrimary/25 rounded-xl p-3.5 space-y-3 text-slate-700 mt-2 text-[11px]">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                                <span class="font-bold text-mashiroDark text-xs flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-base text-mashiroPrimary">vpn_key</span>
+                                    Google AI Studio でのAPIキー取得手順（無料枠あり・約1分）
+                                </span>
+                                <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="bg-mashiroPrimary hover:bg-mashiroDark text-white px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-sm transition">
+                                    <span>Google AI Studio を開く</span>
+                                    <span class="material-symbols-outlined text-xs">open_in_new</span>
+                                </a>
+                            </div>
+
+                            <ol class="space-y-2 list-decimal list-inside leading-relaxed text-slate-600">
+                                <li>
+                                    <strong class="text-slate-800">Google AI Studio へアクセス:</strong> 右上のボタンまたは <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" class="text-mashiroPrimary underline font-bold">aistudio.google.com/apikey</a> を開き、Googleアカウントでログインします。
+                                </li>
+                                <li>
+                                    <strong class="text-slate-800">APIキーの作成:</strong> 画面内の青いボタン <strong class="text-slate-800 font-bold">「Create API key」</strong>（または「APIキーを作成」）をクリックします。
+                                </li>
+                                <li>
+                                    <strong class="text-slate-800">プロジェクトの選択:</strong> 「Create API key in new project」（新しいプロジェクトで作成）を選択します。
+                                </li>
+                                <li>
+                                    <strong class="text-slate-800">キーをコピー＆貼り付け:</strong> 発行された <code class="bg-slate-100 px-1 py-0.5 rounded font-mono text-slate-800 font-bold">AIzaSy...</code> で始まるキーをコピーし、上の入力欄に貼り付けて「設定を保存して適用」を押してください。
+                                </li>
+                            </ol>
+
+                            <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-2.5 text-[10.5px] text-emerald-800 leading-relaxed flex items-start gap-1.5">
+                                <span class="material-symbols-outlined text-sm text-emerald-600 shrink-0 mt-0.5">verified</span>
+                                <div>
+                                    <strong>料金と個人情報保護のポイント:</strong> 無料枠（Free Tier）なら完全0円でお試し可能です。本番運用で個人情報（非学習保証）を徹底する場合は、AI Studio上で支払い設定（有料枠）を有効化しても、Gemini 3.6 Flash なら1会議あたり約0.7〜1.2円（月数十〜数百円程度）で運用できます。
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block font-bold text-slate-700">使用AIモデル（最適化済み）</label>
+                            <a href="https://aistudio.google.com/docs/models?hl=ja" target="_blank" rel="noopener noreferrer" class="text-[10.5px] text-mashiroPrimary hover:underline font-bold flex items-center gap-0.5">
+                                <span>公式モデル一覧・仕様を見る</span>
+                                <span class="material-symbols-outlined text-[12px]">open_in_new</span>
+                            </a>
+                        </div>
+                        <div class="flex items-center justify-between p-2.5 bg-white border border-slate-300 rounded-xl">
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-mashiroPrimary text-lg">bolt</span>
+                                <div>
+                                    <div class="font-bold text-slate-800 text-xs">Gemini 3.6 Flash <span class="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 rounded font-bold ml-1">公式最新・最安コスト</span></div>
+                                    <div class="text-[10.5px] text-slate-500">高速かつ高精度な長文推論・音声解析エンジンに一本化固定</div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="cfgGeminiModel" value="gemini-3.6-flash"/>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. データベース（保存先）設定 -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-slate-800 text-sm flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-base text-mashiroPrimary">database</span>
+                            2. 議事録データベース接続設定
+                        </h4>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block font-bold text-slate-700">データベース種別</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" id="dbTypeGasBtn" onclick="selectDbProvider('gas')" class="p-2.5 rounded-xl border text-left transition bg-white border-mashiroPrimary ring-2 ring-mashiroPrimary/20">
+                                <div class="font-bold text-mashiroPrimary flex items-center justify-between">
+                                    <span>Googleスプレッドシート</span>
+                                    <span class="text-[10px] bg-mashiroLight px-1.5 py-0.5 rounded">推奨・管理容易</span>
+                                </div>
+                                <p class="text-[10px] text-slate-500 mt-0.5">事業所のGoogleドライブで表として直接閲覧・管理可能</p>
+                            </button>
+                            <button type="button" id="dbTypeSupabaseBtn" onclick="selectDbProvider('supabase')" class="p-2.5 rounded-xl border text-left transition bg-white border-slate-200 hover:border-slate-300">
+                                <div class="font-bold text-slate-700 flex items-center justify-between">
+                                    <span>Supabase (PostgreSQL)</span>
+                                    <span class="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded">クラウドRDB</span>
+                                </div>
+                                <p class="text-[10px] text-slate-500 mt-0.5">専用データベースでミリ秒単位の高速クエリ</p>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- GAS URL 設定欄 -->
+                    <div id="gasConfigSection" class="space-y-2 pt-1">
+                        <div class="flex items-center justify-between">
+                            <label class="block font-bold text-slate-700">GAS ウェブアプリURL (`https://script.google.com/macros/s/.../exec`)</label>
+                            <button type="button" onclick="toggleGasGuide()" class="text-[11px] text-mashiroPrimary hover:text-mashiroDark font-bold flex items-center gap-1 bg-mashiroLight/80 hover:bg-mashiroLight px-2 py-0.5 rounded-md transition border border-mashiroPrimary/20">
+                                <span class="material-symbols-outlined text-sm">help</span>
+                                <span id="gasGuideToggleText">作成・設定手順を見る</span>
+                            </button>
+                        </div>
+                        <div class="flex gap-2">
+                            <input type="text" id="cfgGasUrl" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 p-2.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-mashiroPrimary outline-none font-mono text-[11px]"/>
+                            <button type="button" onclick="testDatabaseConnection()" class="px-3 py-2 bg-mashiroLight hover:bg-mashiroPrimary text-mashiroPrimary hover:text-white rounded-xl font-bold transition shrink-0">接続テスト</button>
+                        </div>
+
+                        <!-- 💡 GAS作成ガイド -->
+                        <div id="gasSetupGuide" class="hidden bg-sky-50/80 border border-sky-200 rounded-xl p-3.5 space-y-3 text-slate-700 mt-2 text-[11px]">
+                            <div class="flex items-center justify-between border-b border-sky-200 pb-2">
+                                <span class="font-bold text-mashiroDark text-xs flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-base text-mashiroPrimary">menu_book</span>
+                                    新しいスプレッドシート＆GASの作成手順（約2〜3分）
+                                </span>
+                                <button type="button" onclick="copyGasCode(this)" class="bg-white hover:bg-slate-50 text-mashiroPrimary border border-mashiroPrimary/30 px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-sm transition">
+                                    <span class="material-symbols-outlined text-xs">content_copy</span>Code.gsのコードをコピー
+                                </button>
+                            </div>
+
+                            <ol class="space-y-2 list-decimal list-inside leading-relaxed text-slate-600">
+                                <li><strong class="text-slate-800">スプレッドシートを作成:</strong> Googleドライブで新規スプレッドシートを作成します。</li>
+                                <li><strong class="text-slate-800">Apps Script を開く:</strong> 上部メニューの「拡張機能」→「Apps Script」を開きます。</li>
+                                <li><strong class="text-slate-800">コードを貼り付け:</strong> 既存のコードを全消去し、右上の「Code.gsのコードをコピー」で取得したコードを貼り付けて保存（💾）します。</li>
+                                <li>
+                                    <strong class="text-slate-800">ウェブアプリとして公開:</strong> 右上の「デプロイ」→「新しいデプロイ」を選択。
+                                    <ul class="ml-4 mt-1 space-y-0.5 list-disc list-inside text-slate-700 font-medium">
+                                        <li>種類: <strong>ウェブアプリ</strong></li>
+                                        <li>実行するユーザー: <strong>自分</strong></li>
+                                        <li>アクセスできるユーザー: <strong class="text-rose-600">全員</strong></li>
+                                    </ul>
+                                </li>
+                                <li><strong class="text-slate-800">URLをセット:</strong> 発行された「ウェブアプリのURL」を上の入力欄に貼り付け、「接続テスト」を押してください。</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <!-- Supabase 設定欄 -->
+                    <div id="supabaseConfigSection" class="hidden space-y-2.5 pt-1">
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Supabase Project URL (`https://xxxx.supabase.co`)</label>
+                            <input type="text" id="cfgSupabaseUrl" placeholder="https://xxxx.supabase.co" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-mashiroPrimary outline-none font-mono text-[11px]"/>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Supabase Anon Key (`eyJhbGci...`)</label>
+                            <input type="password" id="cfgSupabaseKey" placeholder="eyJhbGci..." class="w-full p-2.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-mashiroPrimary outline-none font-mono text-[11px]"/>
+                        </div>
+                    </div>
+
+                    <div id="connTestResult" class="hidden p-2.5 rounded-lg text-xs font-bold"></div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 bg-slate-100 border-t border-slate-200 flex items-center justify-between gap-2">
+                <button type="button" onclick="resetSettingsToDefault()" class="text-xs text-slate-500 hover:text-rose-600 font-bold px-3 py-2">初期値に戻す</button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="closeSettingsModal()" class="px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50">キャンセル</button>
+                    <button type="button" onclick="saveSettingsFromModal()" class="px-5 py-2.5 bg-mashiroPrimary hover:bg-mashiroDark text-white rounded-xl text-xs font-bold shadow transition flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm">save</span>設定を保存して適用
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const DEFAULT_GAS_API_URL = 'https://script.google.com/macros/s/AKfycbyFBqBdzxxj_Yb6pblY_aS8UQspLdb59pCnrDS0XZy7G_MX3foCp8M7CWzPBzob_rPa/exec';
-        let GAS_API_URL = localStorage.getItem('COOPS_GAS_API_URL') || DEFAULT_GAS_API_URL;
+        // ============================================================================
+        // 🔧 デフォルト設定定数
+        // ============================================================================
+        const DEFAULT_CONFIG = {
+            GAS_API_URL: 'https://script.google.com/macros/s/AKfycbyFBqBdzxxj_Yb6pblY_aS8UQspLdb59pCnrDS0XZy7G_MX3foCp8M7CWzPBzob_rPa/exec',
+            GEMINI_API_KEY: '',
+            GEMINI_MODEL: 'gemini-3.6-flash',
+            DB_PROVIDER: 'gas',
+            SUPABASE_URL: '',
+            SUPABASE_KEY: ''
+        };
+
+        // ── 状態変数 ──
+        let appConfig = loadAppConfig();
         let selectedAudioFile = null;
+        let currentAudioBlobUrl = null;
+        let currentTargetSystem = 'kaipoke'; // 'kaipoke' | 'ibow'
+        let currentMeetingName = 'サービス担当者会議';
+        let currentMeetingReason = '更新・プラン継続';
+        let currentEditingId = null;
         let saveAutoCloseTimer = null;
 
+        // ── 録音 & Wake Lock & 波形ビジュアライザー変数 ──
         let mediaRecorder = null;
         let audioChunks = [];
         let isRecording = false;
+        let isPaused = false;
         let timerInterval = null;
         let recSeconds = 0;
+        let wakeLockSentinel = null;
+        let audioContext = null;
+        let analyserNode = null;
+        let animationFrameId = null;
 
-        async function callApi(action, payload = {}) {
-            if (!GAS_API_URL) {
-                throw new Error('GAS API URLが設定されていません。');
+        // ============================================================================
+        // 1. 初期化 & 設定管理
+        // ============================================================================
+        function loadAppConfig() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('MASHIRO_APP_CONFIG') || '{}');
+                const cfg = {
+                    gasUrl: saved.gasUrl ?? localStorage.getItem('COOPS_GAS_API_URL') ?? DEFAULT_CONFIG.GAS_API_URL,
+                    geminiKey: saved.geminiKey ?? DEFAULT_CONFIG.GEMINI_API_KEY,
+                    geminiModel: 'gemini-3.6-flash',
+                    dbProvider: saved.dbProvider || DEFAULT_CONFIG.DB_PROVIDER,
+                    supabaseUrl: saved.supabaseUrl || DEFAULT_CONFIG.SUPABASE_URL,
+                    supabaseKey: saved.supabaseKey || DEFAULT_CONFIG.SUPABASE_KEY
+                };
+                if (saved.geminiModel !== 'gemini-3.6-flash') {
+                    localStorage.setItem('MASHIRO_APP_CONFIG', JSON.stringify(cfg));
+                }
+                return cfg;
+            } catch (e) {
+                return {
+                    gasUrl: DEFAULT_CONFIG.GAS_API_URL,
+                    geminiKey: DEFAULT_CONFIG.GEMINI_API_KEY,
+                    geminiModel: 'gemini-3.6-flash',
+                    dbProvider: DEFAULT_CONFIG.DB_PROVIDER,
+                    supabaseUrl: '',
+                    supabaseKey: ''
+                };
+            }
+        }
+
+        function initApp() {
+            const dateEl = document.getElementById('meetingDate');
+            if (dateEl && !dateEl.value) {
+                dateEl.valueAsDate = new Date();
+            }
+
+            drawIdleWaveform();
+            restoreDraft();
+            updateTargetSystemUI();
+            updateCharCounts();
+            updateDbStatusUI();
+            loadHistory(false);
+
+            document.addEventListener('visibilitychange', async () => {
+                if (document.visibilityState === 'visible' && isRecording && !isPaused) {
+                    await requestScreenWakeLock();
+                }
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+
+        function updateDbStatusUI() {
+            const sub = document.getElementById('dbModeSubtitle');
+            if (sub) {
+                sub.textContent = appConfig.dbProvider === 'supabase'
+                    ? 'Supabase クラウドDB（会議名・出力先対応）'
+                    : 'Googleスプレッドシート連携（会議名・出力先対応）';
+            }
+        }
+
+        // ============================================================================
+        // 2. 出力先トグル切替（カイポケ用 vs iBow用 1ウインドウ）＆ 会議名ドロップダウン
+        // ============================================================================
+        function selectTargetSystem(target) {
+            currentTargetSystem = target === 'ibow' ? 'ibow' : 'kaipoke';
+            updateTargetSystemUI();
+            autoSaveDraft();
+        }
+
+        function updateTargetSystemUI() {
+            const isIbow = currentTargetSystem === 'ibow';
+            const btnKaipoke = document.getElementById('targetBtnKaipoke');
+            const btnIbow = document.getElementById('targetBtnIbow');
+            const chipsKaipoke = document.getElementById('memoChipsKaipoke');
+            const chipsIbow = document.getElementById('memoChipsIbow');
+            const previewTitle = document.getElementById('previewHeaderTitle');
+            const kaipokeContainer = document.getElementById('kaipokePreviewContainer');
+            const ibowContainer = document.getElementById('ibowPreviewContainer');
+
+            if (isIbow) {
+                btnIbow.className = 'px-2.5 py-1 rounded-md text-xs font-bold transition bg-mashiroPrimary text-white shadow-sm';
+                btnKaipoke.className = 'px-2.5 py-1 rounded-md text-xs font-bold transition text-slate-600 hover:text-slate-900';
+
+                chipsKaipoke.classList.add('hidden');
+                chipsIbow.classList.remove('hidden');
+                chipsIbow.classList.add('flex');
+
+                previewTitle.textContent = 'iBow貼付データ';
+                kaipokeContainer.classList.add('hidden');
+                ibowContainer.classList.remove('hidden');
+                ibowContainer.classList.add('flex');
+            } else {
+                btnKaipoke.className = 'px-2.5 py-1 rounded-md text-xs font-bold transition bg-mashiroPrimary text-white shadow-sm';
+                btnIbow.className = 'px-2.5 py-1 rounded-md text-xs font-bold transition text-slate-600 hover:text-slate-900';
+
+                chipsKaipoke.classList.remove('hidden');
+                chipsIbow.classList.add('hidden');
+                chipsIbow.classList.remove('flex');
+
+                previewTitle.textContent = 'カイポケ貼付データ';
+                ibowContainer.classList.add('hidden');
+                ibowContainer.classList.remove('flex');
+                kaipokeContainer.classList.remove('hidden');
+            }
+        }
+
+        function onMeetingNameChange(val) {
+            currentMeetingName = val || 'サービス担当者会議';
+            autoSaveDraft();
+        }
+
+        function getEffectiveMeetingName() {
+            const sel = document.getElementById('meetingNameSelect');
+            return (sel && sel.value) ? sel.value : (currentMeetingName || 'サービス担当者会議');
+        }
+
+        function onMeetingReasonChange(val) {
+            currentMeetingReason = val || '更新・プラン継続';
+            autoSaveDraft();
+        }
+
+        function getEffectiveMeetingReason() {
+            const sel = document.getElementById('meetingReasonSelect');
+            return (sel && sel.value) ? sel.value : (currentMeetingReason || '更新・プラン継続');
+        }
+
+        // ============================================================================
+        // 3. Screen Wake Lock API（録音中のブラックアウト・画面消灯防止）
+        // ============================================================================
+        async function requestScreenWakeLock() {
+            const badge = document.getElementById('wakeLockBadge');
+            if ('wakeLock' in navigator) {
+                try {
+                    wakeLockSentinel = await navigator.wakeLock.request('screen');
+                    badge.classList.remove('hidden');
+                    badge.classList.add('flex');
+                    wakeLockSentinel.addEventListener('release', () => {
+                        if (!isRecording) {
+                            badge.classList.add('hidden');
+                            badge.classList.remove('flex');
+                        }
+                    });
+                } catch (err) {
+                    console.warn('Wake Lock request failed:', err.message);
+                }
+            }
+        }
+
+        async function releaseScreenWakeLock() {
+            const badge = document.getElementById('wakeLockBadge');
+            if (wakeLockSentinel) {
+                try {
+                    await wakeLockSentinel.release();
+                } catch (e) {}
+                wakeLockSentinel = null;
+            }
+            badge.classList.add('hidden');
+            badge.classList.remove('flex');
+        }
+
+        // ============================================================================
+        // 4. ブラウザ録音（波形ビジュアライザー・一時停止・ダウンロード保護）
+        // ============================================================================
+        function switchAudioTab(mode) {
+            const btnRec = document.getElementById('tabBtnRecord');
+            const btnUp = document.getElementById('tabBtnUpload');
+            const panelRec = document.getElementById('audioPanelRecord');
+            const panelUp = document.getElementById('audioPanelUpload');
+
+            if (mode === 'record') {
+                btnRec.className = 'py-1.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition bg-white text-mashiroPrimary shadow-sm';
+                btnUp.className = 'py-1.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition text-slate-600 hover:text-slate-900';
+                panelRec.classList.remove('hidden');
+                panelUp.classList.add('hidden');
+            } else {
+                btnUp.className = 'py-1.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition bg-white text-mashiroPrimary shadow-sm';
+                btnRec.className = 'py-1.5 px-3 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition text-slate-600 hover:text-slate-900';
+                panelUp.classList.remove('hidden');
+                panelRec.classList.add('hidden');
+            }
+        }
+
+        function getSupportedAudioMimeType() {
+            const types = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'];
+            for (const t of types) {
+                if (window.MediaRecorder && MediaRecorder.isTypeSupported(t)) return t;
+            }
+            return '';
+        }
+
+        async function toggleRecording() {
+            const startStopBtn = document.getElementById('recStartStopBtn');
+            const pauseBtn = document.getElementById('recPauseResumeBtn');
+            const icon = document.getElementById('recIcon');
+            const btnText = document.getElementById('recBtnText');
+            const statusDot = document.getElementById('recStatusDot');
+            const statusText = document.getElementById('recStatusText');
+            const overlayText = document.getElementById('waveformOverlayText');
+
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+                    });
+
+                    await requestScreenWakeLock();
+
+                    const mimeType = getSupportedAudioMimeType();
+                    mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = e => {
+                        if (e.data && e.data.size > 0) audioChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const actualMime = mediaRecorder.mimeType || 'audio/webm';
+                        const ext = actualMime.includes('mp4') ? 'm4a' : 'webm';
+                        const audioBlob = new Blob(audioChunks, { type: actualMime });
+                        const nowStr = new Date().toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' }).replace(':', '');
+                        const fileName = `${getEffectiveMeetingName()}_${nowStr}.${ext}`;
+                        const fileObj = new File([audioBlob], fileName, { type: actualMime });
+                        setAudioFileState(fileObj, audioBlob);
+                    };
+
+                    mediaRecorder.start(1000);
+                    isRecording = true;
+                    isPaused = false;
+
+                    startWaveformVisualizer(stream);
+                    overlayText.classList.add('hidden');
+
+                    startStopBtn.className = 'flex-1 py-2.5 px-4 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition shadow-md rec-pulse';
+                    icon.textContent = 'stop_circle';
+                    btnText.textContent = '録音を完了する';
+                    pauseBtn.classList.remove('hidden');
+                    pauseBtn.classList.add('flex');
+
+                    statusDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping';
+                    statusText.textContent = '録音中（画面消灯防止 ON）';
+                    statusText.className = 'text-xs font-bold text-rose-600';
+
+                    recSeconds = 0;
+                    updateTimerDisplay();
+                    timerInterval = setInterval(() => {
+                        if (!isPaused) {
+                            recSeconds++;
+                            updateTimerDisplay();
+                        }
+                    }, 1000);
+
+                } catch (err) {
+                    alert('マイクの使用が許可されなかったか、利用できませんでした。\n詳細: ' + err.message);
+                }
+            } else {
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                }
+                isRecording = false;
+                isPaused = false;
+                clearInterval(timerInterval);
+                stopWaveformVisualizer();
+                await releaseScreenWakeLock();
+
+                startStopBtn.className = 'flex-1 py-2.5 px-4 bg-mashiroPrimary hover:bg-mashiroDark text-white rounded-xl font-bold text-xs md:text-sm flex items-center justify-center gap-2 transition shadow-sm';
+                icon.textContent = 'fiber_manual_record';
+                btnText.textContent = '直接録音を開始する';
+                pauseBtn.classList.add('hidden');
+                pauseBtn.classList.remove('flex');
+
+                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+                statusText.textContent = '録音完了！';
+                statusText.className = 'text-xs font-bold text-emerald-700';
+                overlayText.textContent = '録音が完了しました';
+                overlayText.classList.remove('hidden');
+            }
+        }
+
+        function togglePauseRecording() {
+            if (!mediaRecorder || !isRecording) return;
+            const pauseIcon = document.getElementById('pauseIcon');
+            const pauseBtnText = document.getElementById('pauseBtnText');
+            const statusText = document.getElementById('recStatusText');
+            const statusDot = document.getElementById('recStatusDot');
+
+            if (!isPaused) {
+                mediaRecorder.pause();
+                isPaused = true;
+                pauseIcon.textContent = 'play_arrow';
+                pauseBtnText.textContent = '再開';
+                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500';
+                statusText.textContent = '一時停止中';
+                statusText.className = 'text-xs font-bold text-amber-700';
+            } else {
+                mediaRecorder.resume();
+                isPaused = false;
+                pauseIcon.textContent = 'pause';
+                pauseBtnText.textContent = '一時停止';
+                statusDot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping';
+                statusText.textContent = '録音中（画面消灯防止 ON）';
+                statusText.className = 'text-xs font-bold text-rose-600';
+            }
+        }
+
+        function updateTimerDisplay() {
+            const hrs = String(Math.floor(recSeconds / 3600)).padStart(2, '0');
+            const mins = String(Math.floor((recSeconds % 3600) / 60)).padStart(2, '0');
+            const secs = String(recSeconds % 60).padStart(2, '0');
+            document.getElementById('timerCount').textContent = `${hrs}:${mins}:${secs}`;
+        }
+
+        function drawIdleWaveform() {
+            const canvas = document.getElementById('waveformCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const bars = 40;
+            const barWidth = 6;
+            const gap = (canvas.width - bars * barWidth) / (bars + 1);
+            ctx.fillStyle = '#334155';
+            for (let i = 0; i < bars; i++) {
+                const x = gap + i * (barWidth + gap);
+                const h = 4;
+                const y = (canvas.height - h) / 2;
+                ctx.beginPath();
+                ctx.roundRect(x, y, barWidth, h, 2);
+                ctx.fill();
+            }
+        }
+
+        function startWaveformVisualizer(stream) {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioContext.createMediaStreamSource(stream);
+                analyserNode = audioContext.createAnalyser();
+                analyserNode.fftSize = 128;
+                source.connect(analyserNode);
+
+                const canvas = document.getElementById('waveformCanvas');
+                const ctx = canvas.getContext('2d');
+                const bufferLength = analyserNode.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+
+                function renderFrame() {
+                    if (!isRecording) return;
+                    animationFrameId = requestAnimationFrame(renderFrame);
+                    analyserNode.getByteFrequencyData(dataArray);
+
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    const bars = 40;
+                    const barWidth = 6;
+                    const gap = (canvas.width - bars * barWidth) / (bars + 1);
+
+                    for (let i = 0; i < bars; i++) {
+                        const val = isPaused ? 8 : dataArray[i % bufferLength];
+                        const percent = Math.max(0.08, val / 255);
+                        const h = percent * (canvas.height - 6);
+                        const x = gap + i * (barWidth + gap);
+                        const y = (canvas.height - h) / 2;
+
+                        ctx.fillStyle = isPaused ? '#F59E0B' : (percent > 0.5 ? '#38BDF8' : '#036EB8');
+                        ctx.beginPath();
+                        ctx.roundRect(x, y, barWidth, h, 3);
+                        ctx.fill();
+                    }
+                }
+                renderFrame();
+            } catch (e) {}
+        }
+
+        function stopWaveformVisualizer() {
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            if (audioContext) {
+                audioContext.close().catch(() => {});
+                audioContext = null;
+            }
+            drawIdleWaveform();
+        }
+
+        // ============================================================================
+        // 5. ボイスメモ・音声ファイル管理 ＆ ドラッグ＆ドロップ
+        // ============================================================================
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('audioPanelUpload').classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('audioPanelUpload').classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('audioPanelUpload').classList.remove('drag-over');
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                const file = e.dataTransfer.files[0];
+                setAudioFileState(file, file);
+            }
+        }
+
+        function handleFileSelect(inputElement) {
+            if (inputElement.files && inputElement.files[0]) {
+                const file = inputElement.files[0];
+                setAudioFileState(file, file);
+            }
+        }
+
+        function setAudioFileState(fileObj, blobForPreview) {
+            selectedAudioFile = fileObj;
+            const sizeMB = (fileObj.size / (1024 * 1024)).toFixed(2);
+            document.getElementById('fileNameDisplay').classList.remove('hidden');
+            document.getElementById('fileNameSpan').textContent = fileObj.name;
+            document.getElementById('fileSizeSpan').textContent = `サイズ: ${sizeMB} MB`;
+
+            if (currentAudioBlobUrl) URL.revokeObjectURL(currentAudioBlobUrl);
+            currentAudioBlobUrl = URL.createObjectURL(blobForPreview || fileObj);
+            document.getElementById('audioPreviewPlayer').src = currentAudioBlobUrl;
+        }
+
+        function downloadCurrentAudio() {
+            if (!selectedAudioFile || !currentAudioBlobUrl) return;
+            const a = document.createElement('a');
+            a.href = currentAudioBlobUrl;
+            a.download = selectedAudioFile.name || 'meeting_audio.webm';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function clearAudioFile() {
+            selectedAudioFile = null;
+            if (currentAudioBlobUrl) {
+                URL.revokeObjectURL(currentAudioBlobUrl);
+                currentAudioBlobUrl = null;
+            }
+            document.getElementById('audioFile').value = '';
+            document.getElementById('audioPreviewPlayer').src = '';
+            document.getElementById('fileNameDisplay').classList.add('hidden');
+        }
+
+        // ============================================================================
+        // 6. 補足メモ・自動ドラフト保存
+        // ============================================================================
+        function insertMemoPhrase(phrase) {
+            const el = document.getElementById('inputText');
+            el.value = el.value ? `${el.value}\n${phrase}` : phrase;
+            autoSaveDraft();
+        }
+
+        function updateCharCounts() {
+            const fields = [
+                ['outSummary', 'countSummary'],
+                ['outItem1', 'countItem1'],
+                ['outItem2', 'countItem2'],
+                ['outItem3', 'countItem3'],
+                ['outItem4', 'countItem4'],
+                ['outIbowSingle', 'countIbowSingle']
+            ];
+            fields.forEach(([inputId, countId]) => {
+                const val = document.getElementById(inputId)?.value || '';
+                const countEl = document.getElementById(countId);
+                if (countEl) countEl.textContent = `${val.length}文字`;
+            });
+        }
+
+        function autoSaveDraft() {
+            const draft = {
+                targetSystem: currentTargetSystem,
+                meetingName: getEffectiveMeetingName(),
+                meetingReason: getEffectiveMeetingReason(),
+                meetingDate: document.getElementById('meetingDate').value,
+                clientName: document.getElementById('clientName').value,
+                inputText: document.getElementById('inputText').value,
+                summary: document.getElementById('outSummary').value,
+                item1: document.getElementById('outItem1').value,
+                item2: document.getElementById('outItem2').value,
+                item3: document.getElementById('outItem3').value,
+                item4: document.getElementById('outItem4').value,
+                ibowSingle: document.getElementById('outIbowSingle').value
+            };
+            localStorage.setItem('MASHIRO_DRAFT_V3', JSON.stringify(draft));
+        }
+
+        function restoreDraft() {
+            try {
+                const draftStr = localStorage.getItem('MASHIRO_DRAFT_V3') || localStorage.getItem('MASHIRO_DRAFT_V2');
+                if (!draftStr) return;
+                const draft = JSON.parse(draftStr);
+                if (draft.targetSystem) currentTargetSystem = draft.targetSystem;
+                if (draft.meetingName) {
+                    currentMeetingName = draft.meetingName;
+                    const sel = document.getElementById('meetingNameSelect');
+                    if (sel) sel.value = draft.meetingName;
+                }
+                if (draft.meetingReason || draft.meetingType) {
+                    const rReason = draft.meetingReason || draft.meetingType;
+                    currentMeetingReason = rReason;
+                    const rSel = document.getElementById('meetingReasonSelect');
+                    if (rSel) rSel.value = rReason;
+                }
+                if (draft.meetingDate) document.getElementById('meetingDate').value = draft.meetingDate;
+                if (draft.clientName) document.getElementById('clientName').value = draft.clientName;
+                if (draft.inputText) document.getElementById('inputText').value = draft.inputText;
+                if (draft.summary) document.getElementById('outSummary').value = draft.summary;
+                if (draft.item1) document.getElementById('outItem1').value = draft.item1;
+                if (draft.item2) document.getElementById('outItem2').value = draft.item2;
+                if (draft.item3) document.getElementById('outItem3').value = draft.item3;
+                if (draft.item4) document.getElementById('outItem4').value = draft.item4;
+                if (draft.ibowSingle) document.getElementById('outIbowSingle').value = draft.ibowSingle;
+
+                if (draft.clientName || draft.inputText || draft.summary || draft.item1 || draft.ibowSingle) {
+                    document.getElementById('restoreNotice').classList.remove('hidden');
+                }
+            } catch (e) {}
+        }
+
+        // ============================================================================
+        // 7. AI議事録生成エンジン（カイポケ用 vs iBow単一ウインドウ用）
+        // ============================================================================
+        function buildPromptAndSchema(inputText, meetingName, targetSystem, meetingReason) {
+            const isIbow = targetSystem === 'ibow';
+            const mName = meetingName || 'サービス担当者会議';
+            const mReason = meetingReason || '更新・プラン継続';
+
+            if (isIbow) {
+                const prompt = `
+あなたは「ましろ訪問看護ステーション」の優秀で客観的な「議事録作成スペシャリスト」です。
+以下の【入力データ】の内容から、訪問看護記録ソフト「iBow」の1つの入力ウインドウにそのまま貼り付けられる「${mName}」の議事録を作成してください。
+
+【会議名】${mName}
+【実施の理由・開催区分】${mReason}
+【出力先】iBow用（単一ウインドウ）
+
+【絶対遵守ルール】
+1. 自事業所である「ましろ」が【どのようなケア・看護・リハビリを提供するか】【どのような役割を担うか】【カンファレンスや担当者会議等で決定した「ましろ」の具体的なToDo（観察項目・医療処置・ケア内容・訪問体制・主治医やケアマネ等との連携アクション）】に最も強くフォーカスして作成してください。
+2. 実施理由（${mReason}）の背景（なぜこの会議が開催されたか、新規の導入課題か、更新でのモニタリング評価か、状態変化への緊急対策か）を的確に反映してください。
+3. 推測や勝手な創作（ハルシネーション）は厳禁ですが、実際に語られている本人・家族の意向や各専門職の発言・背景理由は省略せず詳細に記載してください。
+4. iBowは入力ウインドウが1つだけのため、窓を分けず、すべて "summary" フィールド1つの中に以下の構成で見出しを付けて読みやすく整形して出力してください：
+■ 会議概要・検討内容
+（開催目的、本人・家族の意向、主治医・ケアマネ・各専門職の発言や議論の経緯）
+
+■ 「ましろ」の役割・提供するケア内容・決定したToDo
+（本会議で決定した「ましろ」が提供する具体的なケア内容、役割、訪問時の観察ポイント、実施すべきToDoを箇条書きと詳細文で明記）
+
+■ 今後の観察ポイント・残された課題・次回予定
+（状態変化時の連絡体制、今後のモニタリング視点、次回予定等）
+
+5. 出力は簡潔かつ専門的な「である調」で記載してください。
+6. テキスト入力があるときは、そちらの情報を優先してください。
+
+【入力データ】
+${inputText ? inputText : '（テキスト入力なし。音声データを優先して詳細に解析してください）'}
+                `.trim();
+
+                const schema = {
+                    type: 'OBJECT',
+                    properties: {
+                        summary: {
+                            type: 'STRING',
+                            description: 'iBowの1つの入力ウインドウにそのまま貼り付ける議事録全文（■会議概要・検討内容、■「ましろ」の役割・提供するケア内容・決定したToDo、■今後の観察ポイント・残された課題・次回予定 の見出し付きで詳細に記載）'
+                        }
+                    },
+                    required: ['summary']
+                };
+                return { prompt, schema };
+            } else {
+                const prompt = `
+あなたは「ましろ居宅介護支援事業所」の優秀で客観的な「議事録作成スペシャリスト」です。
+以下の【入力データ】の内容から、介護保険ソフト「カイポケ」の記録様式に準拠した「${mName}」の議事録を作成してください。
+
+【会議名】${mName}
+【実施の理由・開催区分】${mReason}
+【出力先】カイポケ用
+
+【絶対遵守ルール】
+1. 開催区分（${mReason}）の視点（新規作成の目標設定、更新・プラン継続の検証、区分変更・状態変化の要因と対応策など）を強く意識して作成してください。
+2. 推測や勝手な創作（ハルシネーション）は厳禁ですが、実際にデータ内で語られている「具体的なエピソード」「背景にある理由」「本人や家族の意向」「各専門職（主治医・訪問看護・リハビリ・通所・訪問介護・福祉用具等）の詳細な発言や見解」は絶対に省略せず、【可能な限り詳細に（ボリューミーに）】記載してください。
+3. 単なる結果だけでなく、「なぜその結論に至ったか」のプロセスが第三者（実地指導・監査等）にも分かるように記録してください。
+4. 情報が全くない項目のみ「特記事項なし」としてください。
+5. 出力は簡潔かつ専門的な「である調」で記載してください。
+6. テキスト入力があるときは、そちらの情報を優先してください。特に、"item1"と"item2"の方向付けで記載されることがあるので留意してください。
+
+【入力データ】
+${inputText ? inputText : '（テキスト入力なし。音声データを優先して詳細に解析してください）'}
+                `.trim();
+
+                const schema = {
+                    type: 'OBJECT',
+                    properties: {
+                        summary: { type: 'STRING', description: '会議の主な論点、背景、本人・家族の意向、決定事項を300〜500文字程度でしっかり要約' },
+                        item1: { type: 'STRING', description: '開催目的と、検討した議題を①②③とナンバリングして記載し、振り返りがしやすいように各議題100文字以内で要約' },
+                        item2: { type: 'STRING', description: '議題に対応させ、どの職種（誰）がどのような発言・専門的見解を述べたかを詳細な文章で記載' },
+                        item3: { type: 'STRING', description: '話し合って合意・決定された内容や、決定に至った具体的な理由を詳細に記載。各参加者が本会議後に実施する役割分担や頻度・期間が決まっていれば明記する' },
+                        item4: { type: 'STRING', description: '解決できなかった内容、今後の観察・モニタリングポイント、次回の開催予定などを記載。本会議で概ね方針が決まっていれば今後の観察点とあわせて「必要時随時検討する」と記載' }
+                    },
+                    required: ['summary', 'item1', 'item2', 'item3', 'item4']
+                };
+                return { prompt, schema };
+            }
+        }
+
+        async function generateViaDirectGemini(apiKey, modelName, prompt, responseSchema, audioFile, setProgress) {
+            let fileUri = null;
+            let fileNameToCleanUp = null;
+            const mimeType = (audioFile && audioFile.type) ? audioFile.type.split(';')[0] : 'audio/mp3';
+
+            if (audioFile) {
+                setProgress('① 音声データを高速アップロード中...', 30);
+                const startRes = await fetch(
+                    `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'X-Goog-Upload-Protocol': 'resumable',
+                            'X-Goog-Upload-Command': 'start',
+                            'X-Goog-Upload-Header-Content-Length': String(audioFile.size),
+                            'X-Goog-Upload-Header-Content-Type': mimeType,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ file: { display_name: audioFile.name || 'meeting_audio' } })
+                    }
+                );
+
+                if (!startRes.ok) {
+                    throw new Error(`音声アップロード開始エラー (${startRes.status})`);
+                }
+
+                const uploadUrl = startRes.headers.get('x-goog-upload-url');
+                const uploadRes = await fetch(uploadUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Length': String(audioFile.size),
+                        'X-Goog-Upload-Offset': '0',
+                        'X-Goog-Upload-Command': 'upload, finalize'
+                    },
+                    body: audioFile
+                });
+
+                const uploadJson = await uploadRes.json();
+                if (uploadJson.error) throw new Error(uploadJson.error.message);
+                fileUri = uploadJson.file.uri;
+                fileNameToCleanUp = uploadJson.file.name;
+            }
+
+            setProgress('② Gemini 3.6 Flash が解析中...', 68);
+
+            const parts = [{ text: prompt }];
+            if (fileUri) {
+                parts.push({ file_data: { mime_type: mimeType, file_uri: fileUri } });
+            }
+
+            const genRes = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`,
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts }],
+                        generationConfig: {
+                            responseMimeType: 'application/json',
+                            temperature: 0.2,
+                            responseSchema: responseSchema
+                        }
+                    })
+                }
+            );
+
+            const genJson = await genRes.json();
+
+            if (fileNameToCleanUp) {
+                fetch(`https://generativelanguage.googleapis.com/v1beta/${fileNameToCleanUp}?key=${apiKey}`, {
+                    method: 'DELETE'
+                }).catch(() => {});
+            }
+
+            if (genJson.error) throw new Error(genJson.error.message);
+            const text = genJson.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!text) throw new Error('AIから有効な応答が得られませんでした。');
+            return JSON.parse(text);
+        }
+
+        async function generateViaVercelApi(modelName, prompt, responseSchema, audioFile, setProgress) {
+            let fileUri = null;
+            let fileNameToCleanUp = null;
+            const mimeType = (audioFile && audioFile.type) ? audioFile.type.split(';')[0] : 'audio/mp3';
+
+            if (audioFile) {
+                setProgress('① アップロードセッションを確立中...', 25);
+                const initRes = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'initUpload',
+                        payload: { mimeType, numBytes: audioFile.size, displayName: audioFile.name }
+                    })
+                });
+                const initData = await initRes.json();
+                if (!initRes.ok || initData.error) {
+                    throw new Error(initData.error || 'NO_VERCEL_API');
+                }
+
+                setProgress('② 音声データを直接高速転送中...', 45);
+                const uploadRes = await fetch(initData.uploadUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Length': String(audioFile.size),
+                        'X-Goog-Upload-Offset': '0',
+                        'X-Goog-Upload-Command': 'upload, finalize'
+                    },
+                    body: audioFile
+                });
+                const uploadJson = await uploadRes.json();
+                fileUri = uploadJson.file.uri;
+                fileNameToCleanUp = uploadJson.file.name;
+            }
+
+            setProgress('③ Gemini 3.6 Flash が議事録を生成中...', 75);
+            const genRes = await fetch('/api/gemini', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'generate',
+                    payload: { prompt, responseSchema, fileUri, mimeType, modelName, fileNameToCleanUp }
+                })
+            });
+            const genData = await genRes.json();
+            if (!genRes.ok || genData.error) {
+                throw new Error(genData.error || 'Vercel API生成エラー');
+            }
+            return genData;
+        }
+
+        async function generateMinutesFromUI() {
+            const inputText = document.getElementById('inputText').value.trim();
+
+            if (!inputText && !selectedAudioFile) {
+                alert('会議音声を録音・添付するか、補足メモを入力してください。');
+                return;
+            }
+
+            const btn = document.getElementById('generateBtn');
+            const loading = document.getElementById('loadingMsg');
+            const stepTitle = document.getElementById('loadingStepTitle');
+            const progressBar = document.getElementById('loadingProgressBar');
+            const elapsedEl = document.getElementById('loadingElapsed');
+
+            btn.classList.add('hidden');
+            loading.classList.remove('hidden');
+
+            let elapsedSec = 0;
+            elapsedEl.textContent = '0秒';
+            const elapsedTimer = setInterval(() => {
+                elapsedSec++;
+                elapsedEl.textContent = `${elapsedSec}秒`;
+            }, 1000);
+
+            const setProgress = (title, percent) => {
+                stepTitle.textContent = title;
+                progressBar.style.width = `${percent}%`;
+            };
+
+            const resetUI = () => {
+                clearInterval(elapsedTimer);
+                btn.classList.remove('hidden');
+                loading.classList.add('hidden');
+                progressBar.style.width = '25%';
+            };
+
+            try {
+                const effectiveMeetingName = getEffectiveMeetingName();
+                const effectiveReason = getEffectiveMeetingReason();
+                const { prompt, schema } = buildPromptAndSchema(inputText, effectiveMeetingName, currentTargetSystem, effectiveReason);
+                const modelName = 'gemini-3.6-flash';
+                let result = null;
+
+                if (appConfig.geminiKey && appConfig.geminiKey.trim()) {
+                    result = await generateViaDirectGemini(
+                        appConfig.geminiKey.trim(),
+                        modelName,
+                        prompt,
+                        schema,
+                        selectedAudioFile,
+                        setProgress
+                    );
+                } else {
+                    let triedVercel = false;
+                    if (window.location.protocol.startsWith('http')) {
+                        try {
+                            result = await generateViaVercelApi(modelName, prompt, schema, selectedAudioFile, setProgress);
+                            triedVercel = true;
+                        } catch (vercelErr) {
+                            console.info('Vercel API未設定のためGASエンドポイントへフォールバックします:', vercelErr.message);
+                        }
+                    }
+
+                    if (!triedVercel || !result) {
+                        setProgress('GAS経由でAI解析を実行中...', 50);
+                        let audioData = null;
+                        if (selectedAudioFile) {
+                            const base64Str = await fileToBase64(selectedAudioFile);
+                            audioData = {
+                                mimeType: (selectedAudioFile.type || 'audio/mp3').split(';')[0],
+                                base64: base64Str
+                            };
+                        }
+                        result = await callGasApi('generateMinutes', {
+                            inputText: prompt,
+                            audioData,
+                            meetingName: effectiveMeetingName,
+                            meetingReason: effectiveReason,
+                            targetSystem: currentTargetSystem,
+                            modelName
+                        });
+                    }
+                }
+
+                setProgress('完了！', 100);
+
+                if (currentTargetSystem === 'ibow') {
+                    // iBow用は単一ウインドウに全文を格納（万が一旧GASが分割項目を返した場合も綺麗に統合）
+                    let ibowText = result.summary || '';
+                    if (result.item3 || result.item2) {
+                        const parts = [];
+                        if (result.summary) parts.push(`■ 会議概要\n${result.summary}`);
+                        if (result.item1) parts.push(`■ 検討した項目\n${result.item1}`);
+                        if (result.item2) parts.push(`■ 検討内容\n${result.item2}`);
+                        if (result.item3) parts.push(`■ 「ましろ」の役割・提供ケア・決定ToDo\n${result.item3}`);
+                        if (result.item4) parts.push(`■ 今後の観察ポイント・課題\n${result.item4}`);
+                        ibowText = parts.join('\n\n');
+                    }
+                    document.getElementById('outIbowSingle').value = ibowText;
+                } else {
+                    document.getElementById('outSummary').value = result.summary || '';
+                    document.getElementById('outItem1').value = result.item1 || '';
+                    document.getElementById('outItem2').value = result.item2 || '';
+                    document.getElementById('outItem3').value = result.item3 || '';
+                    document.getElementById('outItem4').value = result.item4 || '';
+                }
+
+                updateCharCounts();
+                autoSaveDraft();
+                resetUI();
+
+                if (window.innerWidth < 1024) {
+                    document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
+                }
+            } catch (err) {
+                alert('【AI生成エラー】\n' + err.message);
+                resetUI();
+            }
+        }
+
+        function fileToBase64(fileObj) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(fileObj);
+            });
+        }
+
+        // ============================================================================
+        // 8. データベース保存・過去ログ管理（会議名・出力先メタデータ対応）
+        // ============================================================================
+        function packInputTextWithMeta(rawText, meetingName, targetSystem, meetingReason) {
+            const cleanText = stripMetaFromInputText(rawText).cleanText;
+            const sysLabel = targetSystem === 'ibow' ? 'iBow用' : 'カイポケ用';
+            const reason = meetingReason || '更新・プラン継続';
+            return `【会議名:${meetingName} / 区分:${reason} / 出力先:${sysLabel}】\n${cleanText}`;
+        }
+
+        function stripMetaFromInputText(text) {
+            const str = String(text || '');
+            const match = str.match(/^【会議名:([^／\]]+)(?:[／/]\s*区分:([^／\]]+))?(?:[／/]\s*出力先:([^】]+))?】\r?\n?/);
+            if (match) {
+                return {
+                    meetingName: match[1].trim(),
+                    meetingReason: (match[2] || '').trim(),
+                    targetSystemLabel: (match[3] || '').trim(),
+                    cleanText: str.slice(match[0].length)
+                };
+            }
+            return {
+                meetingName: '',
+                meetingReason: '',
+                targetSystemLabel: '',
+                cleanText: str
+            };
+        }
+
+        async function callGasApi(action, payload = {}) {
+            const url = appConfig.gasUrl;
+            if (!url) {
+                throw new Error('GAS WebアプリURLが設定されていません。右上の「設定」から確認してください。');
             }
             try {
-                const res = await fetch(GAS_API_URL, {
+                const res = await fetch(url, {
                     method: 'POST',
                     mode: 'cors',
                     redirect: 'follow',
@@ -322,157 +1635,643 @@
                 const data = await res.json();
                 if (data && data.error) throw new Error(data.error);
                 return data;
-            } catch(err) {
-                console.error("API Call Error:", err);
+            } catch (err) {
                 if (err.message.includes('Failed to fetch')) {
-                    throw new Error('GASへの通信に失敗しました。GASのデプロイ設定で「アクセスできるユーザー」が「全員」になっているかご確認ください。');
+                    throw new Error('データベース(GAS)への通信に失敗しました。インターネット接続またはGASの公開設定（全員アクセス可）をご確認ください。');
                 }
                 throw err;
             }
         }
 
-        function initApp() {
-            const dateEl = document.getElementById('meetingDate');
-            if (dateEl && !dateEl.value) dateEl.valueAsDate = new Date();
-            
-            // ⚡ 持ち帰り保護：一時保存ドラフトがあれば自動復元
-            restoreDraft();
-            loadHistory();
-        }
-
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
-        } else {
-            initApp();
-        }
-        window.onload = initApp;
-
-        /* 💾 持ち帰り時のデータ保持（自動ドラフト保存） */
-        function autoSaveDraft() {
-            const draft = {
-                meetingDate: document.getElementById('meetingDate').value,
-                clientName: document.getElementById('clientName').value,
-                inputText: document.getElementById('inputText').value
+        async function callSupabaseApi(method, query = '', bodyObj = null) {
+            const baseUrl = appConfig.supabaseUrl.replace(/\/$/, '');
+            const key = appConfig.supabaseKey;
+            if (!baseUrl || !key) {
+                throw new Error('SupabaseのURLとAnon Keyが設定されていません。');
+            }
+            const headers = {
+                'apikey': key,
+                'Authorization': `Bearer ${key}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'return=representation'
             };
-            localStorage.setItem('CARECORE_DRAFT', JSON.stringify(draft));
+            const res = await fetch(`${baseUrl}/rest/v1/minutes_logs${query}`, {
+                method,
+                headers,
+                body: bodyObj ? JSON.stringify(bodyObj) : undefined
+            });
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(`Supabaseエラー (${res.status}): ${errText}`);
+            }
+            return res.status === 204 ? {} : await res.json();
         }
 
-        function restoreDraft() {
+        async function saveLogFromUI(forceNew = false) {
+            const meetingDate = document.getElementById('meetingDate').value;
+            const rawClientName = document.getElementById('clientName').value.trim() || '名前なし';
+            const effectiveMeetingName = getEffectiveMeetingName();
+            const effectiveReason = getEffectiveMeetingReason();
+            const isIbow = currentTargetSystem === 'ibow';
+            const sysLabel = isIbow ? 'iBow用' : 'カイポケ用';
+            const rawInputText = document.getElementById('inputText').value;
+            const packedInputText = packInputTextWithMeta(rawInputText, effectiveMeetingName, currentTargetSystem, effectiveReason);
+
+            const summary = isIbow
+                ? document.getElementById('outIbowSingle').value
+                : document.getElementById('outSummary').value;
+            const item1 = isIbow ? '' : document.getElementById('outItem1').value;
+            const item2 = isIbow ? '' : document.getElementById('outItem2').value;
+            const item3 = isIbow ? '' : document.getElementById('outItem3').value;
+            const item4 = isIbow ? '' : document.getElementById('outItem4').value;
+
+            if (!summary && !item1 && !item2) {
+                alert('まだ議事録が作成されていません。');
+                return;
+            }
+
+            const saveBtn = document.getElementById('saveDbBtn');
+            const origHtml = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span>保存中...';
+            saveBtn.disabled = true;
+
+            const displayClientWithMeta = `${rawClientName} 【${effectiveMeetingName}（${effectiveReason}）｜${sysLabel}】`;
+
+            const recordPayload = {
+                id: forceNew ? null : currentEditingId,
+                meetingDate,
+                clientName: displayClientWithMeta,
+                inputText: packedInputText,
+                summary,
+                item1,
+                item2,
+                item3,
+                item4,
+                meetingName: effectiveMeetingName,
+                meetingReason: effectiveReason,
+                targetSystem: currentTargetSystem
+            };
+
+            saveToLocalBackup(recordPayload);
+
             try {
-                const draftStr = localStorage.getItem('CARECORE_DRAFT');
-                if (draftStr) {
-                    const draft = JSON.parse(draftStr);
-                    if (draft.meetingDate) document.getElementById('meetingDate').value = draft.meetingDate;
-                    if (draft.clientName) document.getElementById('clientName').value = draft.clientName;
-                    if (draft.inputText) document.getElementById('inputText').value = draft.inputText;
-                    if (draft.clientName || draft.inputText) {
-                        document.getElementById('restoreNotice').classList.remove('hidden');
+                let resMsg = `「${effectiveMeetingName}（${effectiveReason}｜${sysLabel}）」として保存しました！`;
+                if (appConfig.dbProvider === 'supabase') {
+                    const sbRow = {
+                        meeting_date: meetingDate,
+                        client_name: displayClientWithMeta,
+                        input_text: packedInputText,
+                        summary, item1, item2, item3, item4
+                    };
+                    if (!forceNew && currentEditingId) {
+                        await callSupabaseApi('PATCH', `?id=eq.${currentEditingId}`, sbRow);
+                        resMsg = 'Supabase上の既存データを更新しました！';
+                    } else {
+                        await callSupabaseApi('POST', '', sbRow);
+                        resMsg = 'Supabaseデータベースに新規保存しました！';
+                    }
+                } else {
+                    const res = await callGasApi('saveLogAndFinish', recordPayload);
+                    resMsg = res.message || resMsg;
+                }
+
+                saveBtn.innerHTML = origHtml;
+                saveBtn.disabled = false;
+
+                localStorage.removeItem('MASHIRO_DRAFT_V3');
+                document.getElementById('restoreNotice').classList.add('hidden');
+
+                showSaveSuccessModal('保存が完了しました！', resMsg);
+                loadHistory(true);
+            } catch (err) {
+                saveBtn.innerHTML = origHtml;
+                saveBtn.disabled = false;
+                alert('クラウド保存エラー: ' + err.message);
+            }
+        }
+
+        function parseClientNameAndMeta(rawClientStr, itemMeetingName, itemTargetSystem, itemMeetingReason) {
+            let clientName = String(rawClientStr || '名前なし');
+            let meetingName = itemMeetingName || '';
+            let meetingReason = itemMeetingReason || '';
+            let targetSystem = itemTargetSystem || '';
+
+            // 川口 太郎 様 【サービス担当者会議（更新・プラン継続）｜カイポケ用】
+            // または 川口 太郎 様 【サービス担当者会議｜カイポケ用】
+            const tagMatch = clientName.match(/^(.*?)\s*【([^（(｜|】]+)(?:[（(]([^）)]+)[）)])?(?:[｜|]([^】]+))?】$/);
+            if (tagMatch) {
+                clientName = tagMatch[1].trim() || '名前なし';
+                if (!meetingName) meetingName = tagMatch[2].trim();
+                if (!meetingReason && tagMatch[3]) meetingReason = tagMatch[3].trim();
+                if (!targetSystem && tagMatch[4]) targetSystem = tagMatch[4].trim();
+            }
+
+            return {
+                cleanClientName: clientName,
+                meetingName: meetingName || 'サービス担当者会議',
+                meetingReason: meetingReason || '更新・プラン継続',
+                targetSystem: targetSystem || 'カイポケ用'
+            };
+        }
+
+        function saveToLocalBackup(record) {
+            try {
+                const list = JSON.parse(localStorage.getItem('MASHIRO_LOCAL_LOGS') || '[]');
+                const entry = {
+                    ...record,
+                    localId: Date.now(),
+                    timestamp: new Date().toLocaleString('ja-JP')
+                };
+                list.unshift(entry);
+                localStorage.setItem('MASHIRO_LOCAL_LOGS', JSON.stringify(list.slice(0, 50)));
+            } catch (e) {}
+        }
+
+        async function loadHistory(forceRefresh = false) {
+            const listDiv = document.getElementById('historyList');
+            const refreshIcon = document.getElementById('refreshHistoryIcon');
+            if (refreshIcon && forceRefresh) refreshIcon.classList.add('animate-spin');
+
+            const cachedDataStr = localStorage.getItem('MASHIRO_HISTORY_CACHE');
+            if (cachedDataStr) {
+                try {
+                    const cachedArr = JSON.parse(cachedDataStr);
+                    if (Array.isArray(cachedArr)) {
+                        renderHistoryItems(cachedArr);
+                    }
+                } catch (e) {}
+            } else {
+                listDiv.innerHTML = '<div class="text-center text-slate-400 text-xs mt-8">履歴を読み込み中...</div>';
+            }
+
+            try {
+                let historyArr = [];
+                if (appConfig.dbProvider === 'supabase') {
+                    const rows = await callSupabaseApi('GET', '?select=id,created_at,meeting_date,client_name,summary&order=id.desc&limit=100');
+                    historyArr = rows.map(r => ({
+                        id: r.id,
+                        timestamp: r.created_at ? new Date(r.created_at).toLocaleDateString('ja-JP') : '',
+                        meetingDate: r.meeting_date || '',
+                        clientName: r.client_name || '名前なし',
+                        summaryPreview: (r.summary || '').substring(0, 60)
+                    }));
+                } else {
+                    historyArr = await callGasApi('getHistorySummaryList');
+                }
+
+                if (!historyArr || historyArr.length === 0) {
+                    listDiv.innerHTML = '<div class="text-center text-slate-400 text-xs mt-8">保存された履歴はまだありません</div>';
+                    document.getElementById('historyCountBadge').textContent = '0';
+                    localStorage.removeItem('MASHIRO_HISTORY_CACHE');
+                    return;
+                }
+
+                localStorage.setItem('MASHIRO_HISTORY_CACHE', JSON.stringify(historyArr));
+                renderHistoryItems(historyArr);
+            } catch (err) {
+                if (!cachedDataStr) {
+                    listDiv.innerHTML = `<div class="text-center text-rose-600 font-bold text-xs mt-5 p-3 bg-rose-50 rounded-xl border border-rose-200">⚠️ 履歴読込エラー<br>${err.message}</div>`;
+                }
+            } finally {
+                if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+            }
+        }
+
+        function renderHistoryItems(historyArr) {
+            const listDiv = document.getElementById('historyList');
+            const badge = document.getElementById('historyCountBadge');
+            if (badge) badge.textContent = String(historyArr.length);
+
+            listDiv.innerHTML = '';
+            const container = document.createElement('div');
+            container.className = 'space-y-2';
+
+            historyArr.forEach(item => {
+                const parsed = parseClientNameAndMeta(item.clientName, item.meetingName, item.targetSystem, item.meetingReason);
+                const isIbow = parsed.targetSystem.includes('iBow') || parsed.targetSystem === 'ibow';
+
+                const card = document.createElement('div');
+                card.className = 'history-item flex items-center justify-between p-3 bg-white hover:bg-mashiroLight/70 border border-slate-200 hover:border-mashiroPrimary/40 rounded-xl cursor-pointer transition shadow-sm group';
+                card.onclick = () => restoreHistory(item.id);
+
+                const safeName = escapeHtml(parsed.cleanClientName);
+                const safeDate = escapeHtml(item.meetingDate || '日付未設定');
+                const safeMeeting = escapeHtml(parsed.meetingName);
+                const safeReason = escapeHtml(parsed.meetingReason);
+                const safePreview = escapeHtml(item.summaryPreview || '');
+                const sysBadgeHtml = `<span class="text-[10px] font-bold bg-mashiroLight text-mashiroPrimary border border-mashiroPrimary/20 px-1.5 py-0.5 rounded">${isIbow ? 'iBow' : 'カイポケ'}</span>`;
+
+                card.innerHTML = `
+                    <div class="min-w-0 flex-1 pr-2">
+                        <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                            <span class="text-[10px] font-mono bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-bold">#${item.id}</span>
+                            <span class="text-[11px] font-bold text-slate-600">${safeDate}</span>
+                            ${sysBadgeHtml}
+                            <span class="text-[10px] font-bold bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded truncate max-w-[160px]" title="${safeMeeting}（${safeReason}）">${safeMeeting}</span>
+                        </div>
+                        <div class="font-bold text-slate-800 truncate text-xs md:text-sm">${safeName}</div>
+                        ${safePreview ? `<p class="text-[11px] text-slate-400 truncate mt-0.5">${safePreview}</p>` : ''}
+                    </div>
+                    <button type="button" onclick="confirmDeleteHistory(event, ${item.id}, '${safeName}', '${safeDate}')" class="text-slate-300 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition shrink-0" title="削除">
+                        <span class="material-symbols-outlined text-base">delete</span>
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+
+            listDiv.appendChild(container);
+            filterHistory();
+        }
+
+        async function restoreHistory(rowId) {
+            try {
+                let item = null;
+                if (appConfig.dbProvider === 'supabase') {
+                    const rows = await callSupabaseApi('GET', `?id=eq.${rowId}&limit=1`);
+                    if (!rows || !rows[0]) throw new Error('該当データが見つかりません');
+                    const r = rows[0];
+                    item = {
+                        id: r.id,
+                        meetingDate: r.meeting_date,
+                        clientName: r.client_name,
+                        inputText: r.input_text,
+                        summary: r.summary,
+                        item1: r.item1,
+                        item2: r.item2,
+                        item3: r.item3,
+                        item4: r.item4
+                    };
+                } else {
+                    item = await callGasApi('getLogDetail', { id: rowId });
+                }
+
+                currentEditingId = item.id;
+                document.getElementById('editingRecordBadge').textContent = `#${item.id} 編集中`;
+                document.getElementById('editingRecordBadge').classList.remove('hidden');
+                document.getElementById('saveDbBtnText').textContent = `#${item.id} を上書き保存`;
+                document.getElementById('saveAsNewBtn').classList.remove('hidden');
+                document.getElementById('saveAsNewBtn').classList.add('flex');
+
+                const parsedClient = parseClientNameAndMeta(item.clientName, item.meetingName, item.targetSystem, item.meetingReason);
+                const parsedInput = stripMetaFromInputText(item.inputText);
+
+                const restoredMeetingName = item.meetingName || parsedInput.meetingName || parsedClient.meetingName || 'サービス担当者会議';
+                const restoredMeetingReason = item.meetingReason || parsedInput.meetingReason || parsedClient.meetingReason || '更新・プラン継続';
+                const restoredTargetSys = (item.targetSystem || parsedInput.targetSystemLabel || parsedClient.targetSystem || '').includes('iBow') ? 'ibow' : 'kaipoke';
+
+                // 会議名ドロップダウンの復元
+                const sel = document.getElementById('meetingNameSelect');
+                const standardNames = ['サービス担当者会議', '退院支援指導カンファレンス', '退院共同指導カンファレンス', 'その他会議'];
+                currentMeetingName = standardNames.includes(restoredMeetingName) ? restoredMeetingName : 'その他会議';
+                if (sel) sel.value = currentMeetingName;
+
+                // 実施の理由・開催区分ドロップダウンの復元
+                const selReason = document.getElementById('meetingReasonSelect');
+                currentMeetingReason = restoredMeetingReason;
+                if (selReason) {
+                    let matched = false;
+                    for (let i = 0; i < selReason.options.length; i++) {
+                        if (selReason.options[i].value === restoredMeetingReason || selReason.options[i].textContent.includes(restoredMeetingReason)) {
+                            selReason.selectedIndex = i;
+                            currentMeetingReason = selReason.options[i].value;
+                            matched = true;
+                            break;
+                        }
+                    }
+                    if (!matched) {
+                        selReason.value = '更新・プラン継続';
+                        currentMeetingReason = '更新・プラン継続';
                     }
                 }
-            } catch(e){}
+
+                // 出力先モードの復元
+                selectTargetSystem(restoredTargetSys);
+
+                if (item.meetingDate) {
+                    document.getElementById('meetingDate').value = item.meetingDate.replace(/\//g, '-');
+                }
+                document.getElementById('clientName').value = parsedClient.cleanClientName !== '名前なし' ? parsedClient.cleanClientName : '';
+                document.getElementById('inputText').value = parsedInput.cleanText || '';
+
+                if (restoredTargetSys === 'ibow') {
+                    // iBow単一ウインドウへの復元
+                    let ibowText = item.summary || '';
+                    if (item.item1 || item.item2 || item.item3 || item.item4) {
+                        const parts = [];
+                        if (item.summary) parts.push(item.summary);
+                        if (item.item1) parts.push(`■ 検討した項目\n${item.item1}`);
+                        if (item.item2) parts.push(`■ 検討内容\n${item.item2}`);
+                        if (item.item3) parts.push(`■ ましろの役割・提供ケア・ToDo\n${item.item3}`);
+                        if (item.item4) parts.push(`■ 今後の観察ポイント・課題\n${item.item4}`);
+                        ibowText = parts.join('\n\n');
+                    }
+                    document.getElementById('outIbowSingle').value = ibowText;
+                } else {
+                    document.getElementById('outSummary').value = item.summary || '';
+                    document.getElementById('outItem1').value = item.item1 || '';
+                    document.getElementById('outItem2').value = item.item2 || '';
+                    document.getElementById('outItem3').value = item.item3 || '';
+                    document.getElementById('outItem4').value = item.item4 || '';
+                }
+
+                updateCharCounts();
+                toggleSidebar();
+
+                if (window.innerWidth < 1024) {
+                    document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
+                }
+            } catch (err) {
+                alert('詳細データの読み込みに失敗しました: ' + err.message);
+            }
         }
 
-        function showSaveSuccessModal(title, msg) {
-            document.getElementById('saveModalTitle').textContent = title || '保存が完了しました！';
-            document.getElementById('saveModalMsg').textContent = msg || 'データベースに保存されました。左上のメニューからいつでも呼び出せます。';
-            document.getElementById('saveSuccessModal').classList.remove('hidden');
-            if (saveAutoCloseTimer) clearTimeout(saveAutoCloseTimer);
-            saveAutoCloseTimer = setTimeout(() => {
-                closeSaveSuccessModal();
-            }, 3000);
+        async function confirmDeleteHistory(event, rowId, clientName, meetingDate) {
+            event.stopPropagation();
+            if (!confirm(`「${clientName} 様 (${meetingDate})」の過去ログを削除してもよろしいですか？`)) {
+                return;
+            }
+            try {
+                if (appConfig.dbProvider === 'supabase') {
+                    await callSupabaseApi('DELETE', `?id=eq.${rowId}`);
+                } else {
+                    await callGasApi('deleteLog', { id: rowId });
+                }
+                if (currentEditingId === rowId) {
+                    exitEditingMode();
+                }
+                showSaveSuccessModal('削除完了', '指定した過去ログを削除しました。');
+                loadHistory(true);
+            } catch (err) {
+                alert('削除に失敗しました: ' + err.message);
+            }
         }
 
-        function closeSaveSuccessModal() {
-            document.getElementById('saveSuccessModal').classList.add('hidden');
-            if (saveAutoCloseTimer) clearTimeout(saveAutoCloseTimer);
+        function exitEditingMode() {
+            currentEditingId = null;
+            document.getElementById('editingRecordBadge').classList.add('hidden');
+            document.getElementById('saveDbBtnText').textContent = 'データベースに保存';
+            document.getElementById('saveAsNewBtn').classList.add('hidden');
+            document.getElementById('saveAsNewBtn').classList.remove('flex');
         }
 
-        /* 🎙️ 直接マイク録音機能 */
-        async function toggleRecording() {
-            const btn = document.getElementById('recBtn');
-            const icon = document.getElementById('recIcon');
-            const btnText = document.getElementById('recBtnText');
-            const timerEl = document.getElementById('recTimer');
+        // ============================================================================
+        // 9. コピー機能 ＆ CSVエクスポート
+        // ============================================================================
+        async function copyToClipboard(elementId, btnElement) {
+            const text = document.getElementById(elementId).value;
+            if (!text) {
+                alert('コピーするテキストがありません。');
+                return;
+            }
+            try {
+                await navigator.clipboard.writeText(text);
+                const originalHtml = btnElement.innerHTML;
+                const originalClass = btnElement.className;
+                btnElement.innerHTML = '<span class="material-symbols-outlined text-[14px]">check</span>完了';
+                btnElement.className = 'text-xs bg-slate-100 border border-slate-400 text-slate-800 py-1 px-3 rounded-full shadow-sm flex items-center gap-1 transition font-bold';
+                setTimeout(() => {
+                    btnElement.innerHTML = originalHtml;
+                    btnElement.className = originalClass;
+                }, 1800);
+            } catch (err) {
+                alert('コピーに失敗しました。手動で選択してコピーしてください。');
+            }
+        }
 
-            if (!isRecording) {
+        async function copyAllFormatted(btnElement) {
+            const isIbow = currentTargetSystem === 'ibow';
+            if (isIbow) {
+                const ibowVal = document.getElementById('outIbowSingle').value;
+                if (!ibowVal) {
+                    alert('まだ議事録が作成されていません。');
+                    return;
+                }
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
-                    audioChunks = [];
-
-                    mediaRecorder.ondataavailable = e => {
-                        if (e.data.size > 0) audioChunks.push(e.data);
-                    };
-
-                    mediaRecorder.onstop = () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-                        const reader = new FileReader();
-                        reader.onload = ev => {
-                            const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                            selectedAudioFile = {
-                                name: `直接録音データ_${nowStr}.mp3`,
-                                type: 'audio/mp3',
-                                base64: ev.target.result.split(',')[1]
-                            };
-                            document.getElementById('fileNameDisplay').classList.remove('hidden');
-                            document.getElementById('fileNameSpan').textContent = selectedAudioFile.name;
-                        };
-                        reader.readAsDataURL(audioBlob);
-                    };
-
-                    mediaRecorder.start();
-                    isRecording = true;
-
-                    btn.className = "w-full py-2.5 px-3 bg-amber-700 hover:bg-amber-800 text-white rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition shadow";
-                    icon.textContent = "stop";
-                    btnText.textContent = "録音を停止する";
-                    timerEl.classList.remove('hidden');
-
-                    recSeconds = 0;
-                    updateTimerDisplay();
-                    timerInterval = setInterval(() => {
-                        recSeconds++;
-                        updateTimerDisplay();
-                    }, 1000);
-
-                } catch (err) {
-                    alert("マイクの使用が許可されなかったか、アクセスできませんでした: " + err.message);
+                    await navigator.clipboard.writeText(ibowVal);
+                    const origHtml = btnElement.innerHTML;
+                    btnElement.innerHTML = '<span class="material-symbols-outlined text-sm">check</span>コピー完了！';
+                    setTimeout(() => {
+                        btnElement.innerHTML = origHtml;
+                    }, 2000);
+                } catch (e) {
+                    alert('コピーに失敗しました。');
                 }
+                return;
+            }
+
+            const date = document.getElementById('meetingDate').value || '';
+            const name = document.getElementById('clientName').value || '';
+            const meetingName = getEffectiveMeetingName();
+            const meetingReason = getEffectiveMeetingReason();
+            const summary = document.getElementById('outSummary').value || '';
+            const i1 = document.getElementById('outItem1').value || '';
+            const i2 = document.getElementById('outItem2').value || '';
+            const i3 = document.getElementById('outItem3').value || '';
+            const i4 = document.getElementById('outItem4').value || '';
+
+            if (!summary && !i1 && !i2) {
+                alert('まだ議事録が作成されていません。');
+                return;
+            }
+
+            const formatted = [
+                `【${meetingName} 議事録】`,
+                `実施日: ${date} / 利用者氏名: ${name} / 開催区分: ${meetingReason}`,
+                ``,
+                `■ 全体要約`,
+                summary,
+                ``,
+                `■ ① 検討した項目`,
+                i1,
+                ``,
+                `■ ② 検討内容`,
+                i2,
+                ``,
+                `■ ③ 結論`,
+                i3,
+                ``,
+                `■ ④ 残された課題`,
+                i4
+            ].join('\n');
+
+            try {
+                await navigator.clipboard.writeText(formatted);
+                const origHtml = btnElement.innerHTML;
+                btnElement.innerHTML = '<span class="material-symbols-outlined text-sm">check</span>コピー完了！';
+                setTimeout(() => {
+                    btnElement.innerHTML = origHtml;
+                }, 2000);
+            } catch (e) {
+                alert('コピーに失敗しました。');
+            }
+        }
+
+        function exportHistoryCsv() {
+            const cachedStr = localStorage.getItem('MASHIRO_HISTORY_CACHE');
+            if (!cachedStr) {
+                alert('出力する履歴データがありません。');
+                return;
+            }
+            const arr = JSON.parse(cachedStr);
+            const headers = ['ID', '登録日時', '会議実施日', '会議名', '開催区分', '出力先', '利用者氏名', '要約プレビュー'];
+            const csvRows = [
+                headers.join(','),
+                ...arr.map(r => {
+                    const parsed = parseClientNameAndMeta(r.clientName, r.meetingName, r.targetSystem, r.meetingReason);
+                    return [
+                        r.id,
+                        `"${(r.timestamp || '').replace(/"/g, '""')}"`,
+                        `"${(r.meetingDate || '').replace(/"/g, '""')}"`,
+                        `"${(parsed.meetingName || '').replace(/"/g, '""')}"`,
+                        `"${(parsed.meetingReason || '').replace(/"/g, '""')}"`,
+                        `"${(parsed.targetSystem || '').replace(/"/g, '""')}"`,
+                        `"${(parsed.cleanClientName || '').replace(/"/g, '""')}"`,
+                        `"${(r.summaryPreview || '').replace(/"/g, '""')}"`
+                    ].join(',');
+                })
+            ];
+            const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+            const blob = new Blob([bom, csvRows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `ましろ会議議事録履歴_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // ============================================================================
+        // 10. 設定モーダル・ガイド表示ユーティリティ
+        // ============================================================================
+        function toggleGeminiGuide() {
+            const guide = document.getElementById('geminiSetupGuide');
+            const txt = document.getElementById('geminiGuideToggleText');
+            if (guide.classList.contains('hidden')) {
+                guide.classList.remove('hidden');
+                txt.textContent = '手順を閉じる';
             } else {
-                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                    mediaRecorder.stop();
-                    mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                guide.classList.add('hidden');
+                txt.textContent = 'APIキーの取得手順を見る';
+            }
+        }
+
+        function toggleGasGuide() {
+            const guide = document.getElementById('gasSetupGuide');
+            const txt = document.getElementById('gasGuideToggleText');
+            if (guide.classList.contains('hidden')) {
+                guide.classList.remove('hidden');
+                txt.textContent = '手順を閉じる';
+            } else {
+                guide.classList.add('hidden');
+                txt.textContent = '作成・設定手順を見る';
+            }
+        }
+
+        async function copyGasCode(btn) {
+            try {
+                const res = await fetch('./Code.gs');
+                if (!res.ok) throw new Error('Code.gsの取得に失敗しました');
+                const code = await res.text();
+                await navigator.clipboard.writeText(code);
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<span class="material-symbols-outlined text-xs">check</span>コピー完了！';
+                btn.className = 'bg-emerald-600 text-white px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-sm transition';
+                setTimeout(() => {
+                    btn.innerHTML = orig;
+                    btn.className = 'bg-white hover:bg-slate-50 text-mashiroPrimary border border-mashiroPrimary/30 px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-sm transition';
+                }, 2000);
+            } catch (err) {
+                alert('Code.gsのコピーに失敗しました。プロジェクト内の Code.gs ファイルを開いて内容をコピーしてください。\n詳細: ' + err.message);
+            }
+        }
+
+        function openSettingsModal() {
+            document.getElementById('cfgGeminiKey').value = appConfig.geminiKey || '';
+            document.getElementById('cfgGeminiModel').value = 'gemini-3.6-flash';
+            document.getElementById('cfgGasUrl').value = appConfig.gasUrl || '';
+            document.getElementById('cfgSupabaseUrl').value = appConfig.supabaseUrl || '';
+            document.getElementById('cfgSupabaseKey').value = appConfig.supabaseKey || '';
+            selectDbProvider(appConfig.dbProvider || 'gas');
+            document.getElementById('connTestResult').classList.add('hidden');
+            document.getElementById('settingsModal').classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+        }
+
+        function selectDbProvider(provider) {
+            appConfig.dbProvider = provider;
+            const gasBtn = document.getElementById('dbTypeGasBtn');
+            const sbBtn = document.getElementById('dbTypeSupabaseBtn');
+            const gasSec = document.getElementById('gasConfigSection');
+            const sbSec = document.getElementById('supabaseConfigSection');
+
+            if (provider === 'supabase') {
+                sbBtn.className = 'p-2.5 rounded-xl border text-left transition bg-white border-mashiroPrimary ring-2 ring-mashiroPrimary/20';
+                gasBtn.className = 'p-2.5 rounded-xl border text-left transition bg-white border-slate-200 hover:border-slate-300';
+                sbSec.classList.remove('hidden');
+                gasSec.classList.add('hidden');
+            } else {
+                gasBtn.className = 'p-2.5 rounded-xl border text-left transition bg-white border-mashiroPrimary ring-2 ring-mashiroPrimary/20';
+                sbBtn.className = 'p-2.5 rounded-xl border text-left transition bg-white border-slate-200 hover:border-slate-300';
+                gasSec.classList.remove('hidden');
+                sbSec.classList.add('hidden');
+            }
+        }
+
+        function togglePasswordVisibility(inputId) {
+            const el = document.getElementById(inputId);
+            el.type = el.type === 'password' ? 'text' : 'password';
+        }
+
+        async function testDatabaseConnection() {
+            const resBox = document.getElementById('connTestResult');
+            resBox.classList.remove('hidden');
+            resBox.className = 'p-2.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-600';
+            resBox.textContent = '接続テスト中...';
+
+            try {
+                const tempUrl = document.getElementById('cfgGasUrl').value.trim();
+                const res = await fetch(tempUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'getHistorySummaryList' })
+                });
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    resBox.className = 'p-2.5 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+                    resBox.textContent = `✓ 接続成功！現在 ${data.length} 件の履歴レコードが確認できました。`;
+                } else if (data.error) {
+                    throw new Error(data.error);
                 }
-                isRecording = false;
-                clearInterval(timerInterval);
-
-                btn.className = "w-full py-2.5 px-3 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 transition border border-amber-200";
-                icon.textContent = "fiber_manual_record";
-                btnText.textContent = "直接録音を開始する";
-                timerEl.classList.add('hidden');
+            } catch (err) {
+                resBox.className = 'p-2.5 rounded-lg text-xs font-bold bg-rose-50 text-rose-600 border border-rose-200';
+                resBox.textContent = '⚠️ 接続エラー: ' + err.message;
             }
         }
 
-        function updateTimerDisplay() {
-            const mins = String(Math.floor(recSeconds / 60)).padStart(2, '0');
-            const secs = String(recSeconds % 60).padStart(2, '0');
-            document.getElementById('timerCount').textContent = `${mins}:${secs}`;
+        function saveSettingsFromModal() {
+            appConfig = {
+                geminiKey: document.getElementById('cfgGeminiKey').value.trim(),
+                geminiModel: 'gemini-3.6-flash',
+                dbProvider: appConfig.dbProvider || 'gas',
+                gasUrl: document.getElementById('cfgGasUrl').value.trim() || DEFAULT_CONFIG.GAS_API_URL,
+                supabaseUrl: document.getElementById('cfgSupabaseUrl').value.trim(),
+                supabaseKey: document.getElementById('cfgSupabaseKey').value.trim()
+            };
+            localStorage.setItem('MASHIRO_APP_CONFIG', JSON.stringify(appConfig));
+            updateDbStatusUI();
+            closeSettingsModal();
+            loadHistory(true);
+            showSaveSuccessModal('設定を保存しました', '新しい接続設定・APIキーが適用されました。');
         }
 
-        function handleFileSelect(inputElement) {
-            if (inputElement.files && inputElement.files[0]) {
-                const file = inputElement.files[0];
-                selectedAudioFile = file;
-                document.getElementById('fileNameDisplay').classList.remove('hidden');
-                document.getElementById('fileNameSpan').textContent = file.name;
-                autoSaveDraft();
-            }
-        }
-
-        function clearAudioFile() {
-            selectedAudioFile = null;
-            document.getElementById('audioFile').value = '';
-            document.getElementById('fileNameDisplay').classList.add('hidden');
+        function resetSettingsToDefault() {
+            if (!confirm('接続設定を初期値に戻しますか？')) return;
+            localStorage.removeItem('MASHIRO_APP_CONFIG');
+            appConfig = loadAppConfig();
+            openSettingsModal();
         }
 
         function toggleSidebar() {
@@ -482,7 +2281,7 @@
                 sidebar.classList.remove('sidebar-closed');
                 sidebar.classList.add('sidebar-open');
                 overlay.classList.remove('hidden');
-                loadHistory();
+                loadHistory(false);
             } else {
                 sidebar.classList.remove('sidebar-open');
                 sidebar.classList.add('sidebar-closed');
@@ -493,246 +2292,62 @@
         function filterHistory() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             const items = document.querySelectorAll('.history-item');
-            
-            items.forEach(function(item) {
+            items.forEach(item => {
                 const text = item.innerText.toLowerCase();
-                if (text.includes(query)) {
-                    item.style.display = 'flex';
-                } else {
-                    item.style.display = 'none';
-                }
+                item.style.display = text.includes(query) ? 'flex' : 'none';
             });
         }
 
-        async function copyToClipboard(elementId, btnElement) {
-            const text = document.getElementById(elementId).value;
-            if (!text) { alert("コピーするテキストがありません。"); return; }
-            try {
-                await navigator.clipboard.writeText(text);
-                const originalHtml = btnElement.innerHTML;
-                btnElement.innerHTML = '<span class="material-symbols-outlined text-[14px]">check</span>完了';
-                btnElement.className = 'text-xs bg-slate-100 border border-slate-400 text-slate-800 py-1 px-3 rounded-full shadow-sm flex items-center gap-1 transition-all font-bold';
-                setTimeout(() => {
-                    btnElement.innerHTML = originalHtml;
-                    btnElement.className = 'text-xs bg-white border border-slate-300 hover:bg-slate-100 py-1 px-3 rounded-full shadow-sm flex items-center gap-1 transition-all font-bold';
-                }, 2000);
-            } catch (err) {
-                alert("コピーに失敗しました。手動でコピーしてください。");
-            }
+        function showSaveSuccessModal(title, msg) {
+            document.getElementById('saveModalTitle').textContent = title || '保存が完了しました！';
+            document.getElementById('saveModalMsg').textContent = msg || 'データベースに保存されました。';
+            document.getElementById('saveSuccessModal').classList.remove('hidden');
+            if (saveAutoCloseTimer) clearTimeout(saveAutoCloseTimer);
+            saveAutoCloseTimer = setTimeout(() => {
+                closeSaveSuccessModal();
+            }, 3200);
         }
 
-        async function generateMinutesFromUI() {
-            const inputText = document.getElementById('inputText').value;
-            
-            if (!inputText && !selectedAudioFile) {
-                alert("メモを入力するか、音声データを添付してください。");
-                return;
-            }
-
-            const btn = document.getElementById('generateBtn');
-            const loading = document.getElementById('loadingMsg');
-            btn.style.display = 'none';
-            loading.classList.remove('hidden');
-
-            const resetUI = function() {
-                btn.style.display = 'flex';
-                loading.classList.add('hidden');
-            };
-
-            try {
-                let audioData = null;
-                if (selectedAudioFile) {
-                    if (selectedAudioFile.base64) {
-                        audioData = {
-                            mimeType: selectedAudioFile.type || 'audio/mp3',
-                            base64: selectedAudioFile.base64
-                        };
-                    } else if (selectedAudioFile instanceof File) {
-                        audioData = await new Promise((resolve, reject) => {
-                            const reader = new FileReader();
-                            reader.onload = e => resolve({
-                                mimeType: selectedAudioFile.type || 'audio/m4a',
-                                base64: e.target.result.split(',')[1]
-                            });
-                            reader.onerror = reject;
-                            reader.readAsDataURL(selectedAudioFile);
-                        });
-                    }
-                }
-
-                const result = await callApi('generateMinutes', { inputText, audioData });
-                
-                document.getElementById('outSummary').value = result.summary || '';
-                document.getElementById('outItem1').value = result.item1 || '';
-                document.getElementById('outItem2').value = result.item2 || '';
-                document.getElementById('outItem3').value = result.item3 || '';
-                document.getElementById('outItem4').value = result.item4 || '';
-
-                resetUI();
-                if(window.innerWidth < 768) {
-                    document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
-                }
-            } catch(err) {
-                alert(err.message);
-                resetUI();
-            }
-        }
-
-        async function saveLogFromUI() {
-            const meetingDate = document.getElementById('meetingDate').value;
-            const clientName = document.getElementById('clientName').value;
-            const inputText = document.getElementById('inputText').value;
-            const summary = document.getElementById('outSummary').value;
-            const out1 = document.getElementById('outItem1').value;
-            const out2 = document.getElementById('outItem2').value;
-            const out3 = document.getElementById('outItem3').value;
-            const out4 = document.getElementById('outItem4').value;
-            
-            if (!out1 && !out2) {
-                alert("まだ議事録が作成されていません。");
-                return;
-            }
-
-            const saveBtn = document.querySelector('button[onclick="saveLogFromUI()"]');
-            const origHtml = saveBtn.innerHTML;
-            saveBtn.innerHTML = '<span class="material-symbols-outlined animate-spin">sync</span>保存中...';
-            saveBtn.disabled = true;
-
-            try {
-                const res = await callApi('saveLogAndFinish', {
-                    meetingDate, clientName, inputText, summary,
-                    item1: out1, item2: out2, item3: out3, item4: out4
-                });
-                saveBtn.innerHTML = origHtml;
-                saveBtn.disabled = false;
-                
-                // 保存成功したらドラフトを消去
-                localStorage.removeItem('CARECORE_DRAFT');
-                document.getElementById('restoreNotice').classList.add('hidden');
-
-                showSaveSuccessModal('データベースに保存完了しました！', res.message || '保存されました。左上のメニューからいつでも呼び出せます。');
-                loadHistory(); 
-            } catch(err) {
-                alert("保存エラー: " + err.message);
-                saveBtn.innerHTML = origHtml;
-                saveBtn.disabled = false;
-            }
-        }
-
-        async function loadHistory() {
-            const listDiv = document.getElementById('historyList');
-            
-            const cachedDataStr = localStorage.getItem('CARECORE_HISTORY_CACHE');
-            if (cachedDataStr) {
-                try {
-                    const cachedArr = JSON.parse(cachedDataStr);
-                    if (Array.isArray(cachedArr) && cachedArr.length > 0) {
-                        renderHistoryItems(cachedArr);
-                    }
-                } catch(e) {}
-            } else {
-                listDiv.innerHTML = '<div class="text-center text-slate-400 text-xs mt-5">読み込み中...</div>';
-            }
-            
-            try {
-                const historyArr = await callApi('getHistorySummaryList');
-                if (!historyArr || historyArr.length === 0) {
-                    listDiv.innerHTML = '<div class="text-center text-slate-400 text-xs mt-5">履歴がありません</div>';
-                    localStorage.removeItem('CARECORE_HISTORY_CACHE');
-                    return;
-                }
-                
-                localStorage.setItem('CARECORE_HISTORY_CACHE', JSON.stringify(historyArr));
-                renderHistoryItems(historyArr);
-            } catch (err) {
-                if (!cachedDataStr) {
-                    listDiv.innerHTML = '<div class="text-center text-rose-500 font-bold text-xs mt-5 p-3 bg-rose-50 rounded-lg">⚠️ 読込エラー<br>' + err.message + '</div>';
-                }
-            }
-        }
-
-        function renderHistoryItems(historyArr) {
-            const listDiv = document.getElementById('historyList');
-            listDiv.innerHTML = '';
-            
-            const container = document.createElement('div');
-            container.className = 'divide-y divide-slate-100 border-y border-careBorder bg-white rounded-lg overflow-hidden shadow-sm';
-
-            historyArr.forEach(function(item) {
-                const row = document.createElement('div');
-                row.className = 'history-item flex items-center justify-between py-2.5 px-3 hover:bg-carePrimaryLight/60 cursor-pointer transition text-xs group';
-                row.onclick = () => restoreHistory(item.id);
-                
-                row.innerHTML = `
-                    <div class="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
-                        <span class="text-[10px] font-mono text-slate-400 shrink-0">#${item.id}</span>
-                        <span class="text-[11px] font-bold text-slate-500 shrink-0 whitespace-nowrap">${item.meetingDate}</span>
-                        <span class="font-bold text-slate-800 truncate text-xs">${item.clientName}</span>
-                    </div>
-                    <button onclick="confirmDeleteHistory(event, ${item.id}, '${item.clientName}', '${item.meetingDate}')" class="text-slate-300 hover:text-rose-600 p-1 rounded hover:bg-rose-50 transition shrink-0" title="削除">
-                        <span class="material-symbols-outlined text-base">delete</span>
-                    </button>
-                `;
-                container.appendChild(row);
-            });
-
-            listDiv.appendChild(container);
-            filterHistory();
-        }
-
-        async function confirmDeleteHistory(event, rowId, clientName, meetingDate) {
-            event.stopPropagation();
-            if (!confirm(`「${clientName} 様 (${meetingDate})」の過去ログを削除してもよろしいですか？`)) {
-                return;
-            }
-            try {
-                const res = await callApi('deleteLog', { id: rowId });
-                showSaveSuccessModal('削除完了', res.message || '過去ログを削除しました');
-                loadHistory();
-            } catch (err) {
-                alert("削除に失敗しました: " + err.message);
-            }
-        }
-
-        async function restoreHistory(rowId) {
-            try {
-                const item = await callApi('getLogDetail', { id: rowId });
-                
-                if(item.meetingDate) document.getElementById('meetingDate').value = item.meetingDate.replace(/\//g, '-');
-                document.getElementById('clientName').value = item.clientName !== "名前なし" ? item.clientName : '';
-                document.getElementById('inputText').value = item.inputText || '';
-                document.getElementById('outSummary').value = item.summary || '';
-                document.getElementById('outItem1').value = item.item1 || '';
-                document.getElementById('outItem2').value = item.item2 || '';
-                document.getElementById('outItem3').value = item.item3 || '';
-                document.getElementById('outItem4').value = item.item4 || '';
-                
-                toggleSidebar();
-                
-                if(window.innerWidth < 768) {
-                    document.getElementById('previewSection').scrollIntoView({ behavior: 'smooth' });
-                }
-            } catch (err) {
-                alert("詳細データの読み込みに失敗しました: " + err.message);
-            }
+        function closeSaveSuccessModal() {
+            document.getElementById('saveSuccessModal').classList.add('hidden');
+            if (saveAutoCloseTimer) clearTimeout(saveAutoCloseTimer);
         }
 
         function clearAll() {
-            if(!confirm("画面の入力内容をすべてクリアしますか？（※保存済みのデータは消えません）")) return;
+            if (!confirm('画面の入力内容をすべてクリアしますか？（※保存済みのデータは消えません）')) return;
+            exitEditingMode();
             document.getElementById('meetingDate').valueAsDate = new Date();
             document.getElementById('clientName').value = '';
             document.getElementById('inputText').value = '';
-            document.getElementById('audioFile').value = '';
-            
+            const sel = document.getElementById('meetingNameSelect');
+            if (sel) sel.value = 'サービス担当者会議';
+            currentMeetingName = 'サービス担当者会議';
+
+            const selReason = document.getElementById('meetingReasonSelect');
+            if (selReason) selReason.selectedIndex = 0;
+            currentMeetingReason = '更新・プラン継続';
+
             clearAudioFile();
-            localStorage.removeItem('CARECORE_DRAFT');
+
+            localStorage.removeItem('MASHIRO_DRAFT_V3');
             document.getElementById('restoreNotice').classList.add('hidden');
-            
+
             document.getElementById('outSummary').value = '';
             document.getElementById('outItem1').value = '';
             document.getElementById('outItem2').value = '';
             document.getElementById('outItem3').value = '';
             document.getElementById('outItem4').value = '';
+            document.getElementById('outIbowSingle').value = '';
+            updateCharCounts();
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
         }
     </script>
 </body>
