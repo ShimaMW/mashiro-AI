@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>ましろ居宅介護支援事業所・訪問看護｜AI議事録</title>
+    <title>ましろAI議事録</title>
     <link rel="icon" type="image/png" href="./favicon-mashiro.png"/>
     <link rel="apple-touch-icon" href="./favicon-mashiro.png"/>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -85,9 +85,8 @@
                 </div>
             </a>
 
-            <div class="hidden sm:flex flex-col border-l border-white/25 pl-3">
-                <span class="text-[10px] text-sky-100 font-medium tracking-wider leading-tight">ましろ居宅介護支援事業所・訪問看護ステーション</span>
-                <span class="text-xs md:text-sm font-bold text-white tracking-wide leading-tight">カンファレンス・会議 AI議事録</span>
+            <div class="hidden sm:flex items-center border-l border-white/25 pl-3">
+                <span class="text-sm md:text-base font-extrabold text-white tracking-wide leading-tight">ましろAI議事録</span>
             </div>
         </div>
 
@@ -487,7 +486,7 @@
                     <span class="material-symbols-outlined text-xl">tune</span>
                     <div>
                         <h3 class="font-bold text-sm md:text-base">システム接続・APIキー設定</h3>
-                        <p class="text-[11px] text-sky-100">ましろ居宅介護支援事業所・訪問看護 環境設定</p>
+                        <p class="text-[11px] text-sky-100">ましろAI議事録 環境設定</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeSettingsModal()" class="p-1 rounded-full hover:bg-white/20 text-white transition">
@@ -503,22 +502,23 @@
                             <span class="material-symbols-outlined text-base text-mashiroPrimary">bolt</span>
                             1. Gemini AI 高速解析エンジン設定
                         </h4>
-                        <span class="text-[10px] bg-mashiroPrimary text-white px-2 py-0.5 rounded-full font-bold">直接通信でGAS制限を回避</span>
+                        <span class="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">Vercel環境変数で自動連携</span>
                     </div>
                     <p class="text-[11px] text-slate-600 leading-relaxed">
-                        ここにGemini APIキーを設定すると、重い音声ファイルをGAS経由にせず<strong>ブラウザから直接Gemini APIへ高速ストリーミング転送</strong>します（30〜60分の音声も数十秒で解析完了します）。
+                        ※Vercel環境ではサーバー側（環境変数）でAPIキーが安全に管理されているため、<strong>通常は空欄のままで動作します（現場での入力は不要です）</strong>。個別に別のキーでテストしたい場合のみ入力してください。
                     </p>
 
                     <div class="space-y-2">
                         <div class="flex items-center justify-between">
                             <label class="block font-bold text-slate-700">Gemini API キー (`AIzaSy...`)</label>
+                            <span class="text-[10.5px] text-slate-400 font-medium">（通常は入力不要）</span>
                             <button type="button" onclick="toggleGeminiGuide()" class="text-[11px] text-mashiroPrimary hover:text-mashiroDark font-bold flex items-center gap-1 bg-white hover:bg-mashiroLight px-2 py-0.5 rounded-md transition border border-mashiroPrimary/20">
                                 <span class="material-symbols-outlined text-sm">help</span>
                                 <span id="geminiGuideToggleText">APIキーの取得手順を見る</span>
                             </button>
                         </div>
                         <div class="flex gap-2">
-                            <input type="password" id="cfgGeminiKey" placeholder="AIzaSy...（未入力時はVercel環境変数またはGAS側キーを使用）" class="flex-1 p-2.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-mashiroPrimary outline-none font-mono text-xs"/>
+                            <input type="password" id="cfgGeminiKey" placeholder="通常は空欄でOK（Vercel環境変数で自動稼働）" class="flex-1 p-2.5 bg-white border border-slate-300 rounded-xl focus:ring-2 focus:ring-mashiroPrimary outline-none font-mono text-xs"/>
                             <button type="button" onclick="togglePasswordVisibility('cfgGeminiKey')" class="px-3 bg-white border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50 font-bold">表示</button>
                         </div>
 
