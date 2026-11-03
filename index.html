@@ -228,7 +228,6 @@
                         <label class="text-xs font-bold text-slate-600 flex items-center gap-1">
                             🎤 音声データの追加
                         </label>
-                        <span class="text-[10px] font-bold text-mashiroPrimary bg-mashiroLight px-2 py-0.5 rounded">長時間録音・ボイスメモ両対応</span>
                     </div>
 
                     <!-- モード切替タブ -->
@@ -686,7 +685,7 @@
         // 🔧 デフォルト設定定数
         // ============================================================================
         const DEFAULT_CONFIG = {
-            GAS_API_URL: 'https://script.google.com/macros/s/AKfycbyFBqBdzxxj_Yb6pblY_aS8UQspLdb59pCnrDS0XZy7G_MX3foCp8M7CWzPBzob_rPa/exec',
+            GAS_API_URL: 'https://script.google.com/macros/s/AKfycbyor-izoewJsJMgClhDZu8_lJNmErk7nrYfu0QqnU_YWR9DMC1RFlvqHEuOz7wvRVW3/exec',
             GEMINI_API_KEY: '',
             GEMINI_MODEL: 'gemini-3.6-flash',
             DB_PROVIDER: 'gas',
@@ -722,15 +721,19 @@
         function loadAppConfig() {
             try {
                 const saved = JSON.parse(localStorage.getItem('MASHIRO_APP_CONFIG') || '{}');
+                // 以前の旧GAS_URLや旧モデルが残っている場合は自動で最新の初期値に更新
+                const isOldGasUrl = !saved.gasUrl || saved.gasUrl.includes('AKfycbyFBqBdzxxj_Yb6pblY_aS8UQspLdb59pCnrDS0XZy7G_MX3foCp8M7CWzPBzob_rPa');
+                const effectiveGasUrl = isOldGasUrl ? DEFAULT_CONFIG.GAS_API_URL : saved.gasUrl;
+
                 const cfg = {
-                    gasUrl: saved.gasUrl ?? localStorage.getItem('COOPS_GAS_API_URL') ?? DEFAULT_CONFIG.GAS_API_URL,
+                    gasUrl: effectiveGasUrl,
                     geminiKey: saved.geminiKey ?? DEFAULT_CONFIG.GEMINI_API_KEY,
                     geminiModel: 'gemini-3.6-flash',
                     dbProvider: saved.dbProvider || DEFAULT_CONFIG.DB_PROVIDER,
                     supabaseUrl: saved.supabaseUrl || DEFAULT_CONFIG.SUPABASE_URL,
                     supabaseKey: saved.supabaseKey || DEFAULT_CONFIG.SUPABASE_KEY
                 };
-                if (saved.geminiModel !== 'gemini-3.6-flash') {
+                if (saved.geminiModel !== 'gemini-3.6-flash' || isOldGasUrl) {
                     localStorage.setItem('MASHIRO_APP_CONFIG', JSON.stringify(cfg));
                 }
                 return cfg;
