@@ -39,12 +39,14 @@ export default async function handler(req, res) {
 
     // 2. Resumable Upload セッションURLの発行（大容量音声用）
     if (action === 'initUpload') {
-      const { mimeType = 'audio/mp3', numBytes, displayName = 'meeting_audio' } = payload;
+      const { mimeType = 'audio/mp3', numBytes, displayName = 'meeting_audio', origin } = payload;
+      const clientOrigin = req.headers.origin || origin || 'https://mashiro-ai.vercel.app';
       const startUploadRes = await fetch(
         `https://generativelanguage.googleapis.com/upload/v1beta/files?key=${apiKey}`,
         {
           method: 'POST',
           headers: {
+            'Origin': clientOrigin,
             'X-Goog-Upload-Protocol': 'resumable',
             'X-Goog-Upload-Command': 'start',
             'X-Goog-Upload-Header-Content-Length': String(numBytes),

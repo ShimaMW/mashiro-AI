@@ -1360,7 +1360,6 @@ ${inputText ? inputText : '（テキスト入力なし。音声データを優�
                 const uploadRes = await fetch(uploadUrl, {
                     method: 'POST',
                     headers: {
-                        'Content-Length': String(audioFile.size),
                         'X-Goog-Upload-Offset': '0',
                         'X-Goog-Upload-Command': 'upload, finalize'
                     },
@@ -1422,25 +1421,39 @@ ${inputText ? inputText : '（テキスト入力なし。音声データを優�
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         action: 'initUpload',
-                        payload: { mimeType, numBytes: audioFile.size, displayName: audioFile.name }
+                        payload: {
+                            mimeType,
+                            numBytes: audioFile.size,
+                            displayName: audioFile.name,
+                            origin: window.location.origin
+                        }
                     })
                 });
+                if (initRes.status === 404) {
+                    const err = new Error('NO_VERCEL_API');
+                    err.isNoVercel = true;
+                    throw err;
+                }
                 const initData = await initRes.json();
                 if (!initRes.ok || initData.error) {
-                    throw new Error(initData.error || 'NO_VERCEL_API');
+                    const err = new Error(initData.error || 'NO_VERCEL_API');
+                    if (initData.code === 'NO_ENV_KEY') err.isNoVercel = true;
+                    throw err;
                 }
 
                 setProgress('② 音声データを直接高速転送中...', 45);
                 const uploadRes = await fetch(initData.uploadUrl, {
                     method: 'POST',
                     headers: {
-                        'Content-Length': String(audioFile.size),
                         'X-Goog-Upload-Offset': '0',
                         'X-Goog-Upload-Command': 'upload, finalize'
                     },
                     body: audioFile
                 });
                 const uploadJson = await uploadRes.json();
+                if (uploadJson.error) {
+                    throw new Error(uploadJson.error.message || '音声アップロードに失敗しました');
+                }
                 fileUri = uploadJson.file.uri;
                 fileNameToCleanUp = uploadJson.file.name;
             }
@@ -1454,9 +1467,16 @@ ${inputText ? inputText : '（テキスト入力なし。音声データを優�
                     payload: { prompt, responseSchema, fileUri, mimeType, modelName, fileNameToCleanUp }
                 })
             });
+            if (genRes.status === 404) {
+                const err = new Error('NO_VERCEL_API');
+                err.isNoVercel = true;
+                throw err;
+            }
             const genData = await genRes.json();
             if (!genRes.ok || genData.error) {
-                throw new Error(genData.error || 'Vercel API生成エラー');
+                const err = new Error(genData.error || 'Vercel API生成エラー');
+                if (genData.code === 'NO_ENV_KEY') err.isNoVercel = true;
+                throw err;
             }
             return genData;
         }
@@ -1520,6 +1540,9 @@ ${inputText ? inputText : '（テキスト入力なし。音声データを優�
                             result = await generateViaVercelApi(modelName, prompt, schema, selectedAudioFile, setProgress);
                             triedVercel = true;
                         } catch (vercelErr) {
+                            if (!vercelErr.isNoVercel && !vercelErr.message.includes('Unexpected token')) {
+                                throw vercelErr;
+                            }
                             console.info('Vercel API未設定のためGASエンドポイントへフォールバックします:', vercelErr.message);
                         }
                     }
